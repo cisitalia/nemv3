@@ -1,5 +1,5 @@
 <template>
-    <v-app>
+    <v-app :dark="dark">
         <v-navigation-drawer
         persistent
         :mini-variant="miniVariant"
@@ -40,6 +40,12 @@
             <v-btn icon @click.stop="fixed = !fixed">
                 <v-icon>web</v-icon>
             </v-btn>
+            <v-btn
+                icon
+                @click="dark = !dark"
+            >
+                <v-icon>loop</v-icon>
+            </v-btn>
             <v-toolbar-title v-text="title"></v-toolbar-title>
             <v-spacer></v-spacer>
             <!-- <v-btn icon @click.stop="rightDrawer = !rightDrawer">
@@ -71,7 +77,6 @@
                 account_circle
                 </v-icon>
             </v-badge>
-
         </v-toolbar>
 
         <v-content>
@@ -108,6 +113,7 @@ export default {
             clipped: false,
             drawer: true,
             fixed: false,
+            dark: false,
             items: [
                 {
                     icon: 'home',

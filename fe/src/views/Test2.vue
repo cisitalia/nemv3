@@ -15,7 +15,7 @@
 
         <v-slider v-model="width" min="200" max="500" step="1"></v-slider>
 
-        <v-container fluid>
+        <v-container fluid pt-0>
             <v-navigation-drawer
             :width="width"
             :value="true"

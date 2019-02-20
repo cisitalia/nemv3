@@ -30,6 +30,11 @@ export default new Router({
             path: '/test2',
             name: 'test2',
             component: () => import('./views/Test2.vue')
+        },
+        {
+            path: '*',
+            name: 'e404',
+            component: () => import('./views/e404.vue')
         }
     ]
 })
