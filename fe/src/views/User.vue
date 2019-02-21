@@ -125,12 +125,14 @@ export default {
     methods: {
         getUsers () {
             // axios.get('http://localhost:3000/api/user')
-            axios.get('/api/user')
+            // axios.get('/api/user')
+            axios.get(`${this.$apiRootPath}user`)
                 .then(r => {
                     // console.log(r.data)
                     this.users = r.data.users
                 })
                 .catch(e => {
+                    // eslint-disable-next-line
                     console.error(e.message)
                 })
         },
@@ -142,7 +144,8 @@ export default {
         postUser () {
             this.dialog = false
             // axios.post('http://localhost:3000/api/user', {
-            axios.post('/api/user', {
+            // axios.post('/api/user', {
+            axios.post(`${this.$apiRootPath}user`, {
                 name: this.userName, age: this.userAge
             })
                 .then(r => {
@@ -170,7 +173,8 @@ export default {
             this.putId = '' // 이 변수는 초기화
             this.putState = false
             // axios.put(`http://localhost:3000/api/user/${uId}`, {
-            axios.put(`/api/user/${uId}`, {
+            // axios.put(`/api/user/${uId}`, {
+            axios.put(`${this.$apiRootPath}user/${uId}`, {
                 name: this.userName, age: this.userAge
             })
                 .then(r => {
@@ -186,7 +190,8 @@ export default {
             this.putId = '' // 비운다
 
             // axios.delete(`http://localhost:3000/api/user/${dId}`)
-            axios.delete(`/api/user/${dId}`)
+            // axios.delete(`/api/user/${dId}`)
+            axios.delete(`${this.$apiRootPath}user/${dId}`)
                 .then(r => {
                     this.pop('사용자 삭제 완료')
                     this.getUsers()

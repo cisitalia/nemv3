@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors()) // 개발모드에서만 적용. 실서버에서는 없애야 함.
+if (process.env.NODE_ENV !== 'production') app.use(cors()) // 개발모드에서만 적용. 실서버에서는 없애야 함.
 app.use('/api', require('./routes/api'))
 app.use(history())
 app.use(express.static(path.join(__dirname, '..', 'fe', 'dist')));
@@ -33,6 +33,8 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.send({ msg: err.message });
 });
+
+// console.log(process.env.NODE_ENV) // 개발모드인지 실행모드인지 테스트
 
 // connect mongoose
 const mongoose = require('mongoose')
