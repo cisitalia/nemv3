@@ -124,7 +124,8 @@ export default {
     },
     methods: {
         getUsers () {
-            axios.get('http://localhost:3000/api/user')
+            // axios.get('http://localhost:3000/api/user')
+            axios.get('/api/user')
                 .then(r => {
                     // console.log(r.data)
                     this.users = r.data.users
@@ -140,8 +141,8 @@ export default {
         },
         postUser () {
             this.dialog = false
-            // console.log(this.userName + ', ' + this.userAge)
-            axios.post('http://localhost:3000/api/user', {
+            // axios.post('http://localhost:3000/api/user', {
+            axios.post('/api/user', {
                 name: this.userName, age: this.userAge
             })
                 .then(r => {
@@ -168,7 +169,8 @@ export default {
             const uId = this.putId // 임시로 다른 변수에 넣고
             this.putId = '' // 이 변수는 초기화
             this.putState = false
-            axios.put(`http://localhost:3000/api/user/${uId}`, {
+            // axios.put(`http://localhost:3000/api/user/${uId}`, {
+            axios.put(`/api/user/${uId}`, {
                 name: this.userName, age: this.userAge
             })
                 .then(r => {
@@ -183,7 +185,8 @@ export default {
             const dId = this.putId
             this.putId = '' // 비운다
 
-            axios.delete(`http://localhost:3000/api/user/${dId}`)
+            // axios.delete(`http://localhost:3000/api/user/${dId}`)
+            axios.delete(`/api/user/${dId}`)
                 .then(r => {
                     this.pop('사용자 삭제 완료')
                     this.getUsers()
