@@ -17,17 +17,18 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 80
     }
-  }],
+  }]
 
-  deploy : {
-    production : {
-        user : 'root',
-        host: '133.186.153.47',
-        key: '~/.ssh/pubToastKey.pem',
-        ref  : 'origin/master',
-        repo: 'git@github.com:cisitalia/nemv3.git',
-        path : '/var/www/nemv3',
-        'post-deploy' : 'yarn pm2'
-    }
-  }
+  // 토스트에서 root 접속을 막는 바람에 pm2 deploy는 무용지물이 됨
+//   deploy : {
+//     production : {
+//         user : 'root',
+//         host: '133.186.153.47',
+//         key: '~/.ssh/pubToastKey.pem',
+//         ref  : 'origin/master',
+//         repo: 'git@github.com:cisitalia/nemv3.git',
+//         path : '/var/www/nemv3',
+//         'post-deploy' : 'yarn pm2'
+//     }
+//   }
 };

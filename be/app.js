@@ -34,12 +34,22 @@ app.use(function(err, req, res, next) {
   res.send({ msg: err.message });
 });
 
-// console.log(process.env.NODE_ENV) // 개발모드인지 실행모드인지 테스트
+console.log(`${process.env.NODE_ENV} mode started`) // 개발모드인지 실행모드인지 테스트
 
 // connect mongoose
 const mongoose = require('mongoose')
+// const User = require('./models/users') // 테스트용
 
-mongoose.connect('mongodb://localhost:27017/nemv', { useNewUrlParser: true }, err => {
+// 최상위 경로의 package.json 을 가져와서 뿌려보는 테스트 - 잘된다.
+// const pkg = require('../package.json')
+// console.log(pkg)
+
+// config 파일을 읽어온다.
+const cfg = require('../config')
+// console.log(cfg)
+
+// mongoose.connect('mongodb://localhost:27017/nemv', { useNewUrlParser: true }, err => {
+mongoose.connect(cfg.dbUrl, { useNewUrlParser: true }, err => {
     if (err) return console.error(err)
     console.log('mongoose connected!')
 })
