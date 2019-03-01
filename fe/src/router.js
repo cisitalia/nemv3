@@ -32,6 +32,16 @@ export default new Router({
             component: () => import('./views/Test2.vue')
         },
         {
+            path: '/header',
+            name: '헤더',
+            component: () => import('./views/header.vue')
+        },
+        {
+            path: '/sign',
+            name: '로그인',
+            component: () => import('./views/sign.vue')
+        },
+        {
             path: '*',
             name: 'e404',
             component: () => import('./views/e404.vue')

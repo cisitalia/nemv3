@@ -2,6 +2,7 @@
 const jwt = require('jsonwebtoken')
 const key = 'veryveryhardkey'
 
+/*
 const User = require('./models/users')
 
 // connect mongoose
@@ -67,4 +68,13 @@ const findOneUser = async name => {
     return await User.findOne({ name: name })
 }
 findOneUser('aaa').then(console.log)
+ */
 
+ const asyncTest = async (i) => {
+     if (i > 10) throw new Error('not valid!')
+     return i + 3
+ }
+
+ asyncTest(3)
+    .then(r => console.log(r))
+    .catch(e => console.error(e.mongoose))
