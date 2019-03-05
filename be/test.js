@@ -77,4 +77,4 @@ findOneUser('aaa').then(console.log)
 
  asyncTest(3)
     .then(r => console.log(r))
-    .catch(e => console.error(e.mongoose))
+    .catch(e => console.error(e.message))

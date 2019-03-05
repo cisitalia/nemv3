@@ -126,6 +126,8 @@ export default {
         getUsers () {
             // axios.get('http://localhost:3000/api/user')
             // axios.get('/api/user')
+            // 이제 백엔드 api 경로로 보낼때는 토큰을 같이 보내야 정상적으로 처리된다.
+            // axios.get(`${this.$apiRootPath}user`, { headers: { Authorization: localStorage.getItem('token') } })
             axios.get(`${this.$apiRootPath}user`)
                 .then(r => {
                     // console.log(r.data)

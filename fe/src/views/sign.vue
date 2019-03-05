@@ -33,13 +33,17 @@ export default {
     methods: {
         signIn () {
             // 로그인 아이디/비번 검사 후 토큰을 발행받는다.
-            // 토큰은 localStorage 에 저장한 후
+            // 토큰은 localStorage 에 저장한 후 vuex(스토어)에도 저장한다
             // /header 경로로 보낸다.(후킹의 일종)
             axios.post(`${this.$apiRootPath}sign/in`, this.form)
                 .then(r => {
                     if (!r.data.success) return console.error(r.data.msg)
                     localStorage.setItem('token', r.data.token)
-                    this.$router.push('/header')
+                    this.$store.commit('getToken')
+                    this.$router.push('/')
+
+                    // this.$router.push('/header')
+                    // location.href = '/header' // $router.push() 대신 이렇게 해도 된다
                 })
                 .catch(e => console.error(e.message))
         }

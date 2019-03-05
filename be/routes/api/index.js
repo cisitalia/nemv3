@@ -43,13 +43,17 @@ router.all('*', (req, res, next) => {
             console.log(v)
             next()
         })
-        .catch(e => res.send({ success: false, msg: '[ERR01 - SignIn] ' + e.message }))
+        .catch(e => {
+            console.error('ERROR - token not valid')
+            res.send({ success: false, msg: '[ERR01 - SignIn] ' + e.message })
+        })
 })
 
 // 라우터 모듈 분기
 router.use('/test', require('./test')) // test 폴더
 router.use('/user', require('./user')) // user 폴더
 
+// 경로에러 처리(라우터에 등록되지 않은 경로인 경우 에러 발생)
 // app.js 에서 app.use('/api', require('./routes/api')) 로 보내고 있으니
 // 위의 라우트 모듈 분기에 따라
 // /api/test/~
