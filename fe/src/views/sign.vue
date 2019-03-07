@@ -38,10 +38,18 @@ export default {
             axios.post(`${this.$apiRootPath}sign/in`, this.form)
                 .then(r => {
                     if (!r.data.success) return console.error(r.data.msg)
+
+                    // 토큰 저장
                     localStorage.setItem('token', r.data.token)
                     this.$store.commit('getToken')
-                    this.$router.push('/')
 
+                    // 유저정보 저장
+                    localStorage.setItem('uId', r.data.ui.id)
+                    localStorage.setItem('uName', r.data.ui.name)
+                    localStorage.setItem('uLv', r.data.ui.lv)
+                    this.$store.commit('getLoginUserInfo', r.data.ui)
+
+                    this.$router.push('/')
                     // this.$router.push('/header')
                     // location.href = '/header' // $router.push() 대신 이렇게 해도 된다
                 })

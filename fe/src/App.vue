@@ -1,5 +1,5 @@
 <template>
-    <v-app :dark="dark">
+    <v-app :dark="siteDark">
         <v-navigation-drawer
         persistent
         v-model="drawer"
@@ -28,13 +28,16 @@
         app
         >
             <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-            <v-btn
+            <!-- <v-btn
                 icon
-                @click="dark = !dark"
+                @click="siteDark = !siteDark"
             >
                 <v-icon>loop</v-icon>
-            </v-btn>
-            <v-toolbar-title v-text="title"></v-toolbar-title>
+            </v-btn> -->
+            <v-toolbar-title v-text="siteTitle"></v-toolbar-title>
+            <v-toolbar-title>
+            {{ this.$store.state.userInfo.name }}
+            </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-toolbar-items>
                 <v-menu bottom left>
@@ -45,7 +48,7 @@
                         <v-list-tile @click="$router.push('/')">
                             <v-list-tile-title>홈</v-list-tile-title>
                         </v-list-tile>
-                        <v-list-tile v-if="!$store.state.token" @click="$router.push('sign')">
+                        <v-list-tile v-if="!$store.state.token" @click="$router.push('/sign')">
                             <v-list-tile-title>로그인</v-list-tile-title>
                         </v-list-tile>
                         <v-list-tile v-else @click="signOut">
@@ -61,7 +64,7 @@
         </v-content>
 
         <v-footer fixed app>
-            <span>&copy; 2017 {{ $store.state.token }} </span>
+            <span>&copy; 2017 {{siteCopyright}} </span>
         </v-footer>
     </v-app>
 </template>
@@ -72,13 +75,36 @@ export default {
     data () {
         return {
             drawer: null,
-            dark: false,
+            siteTitle: '기다리는 중',
+            siteCopyright: '기다리는 중',
+            siteDark: false,
             items: [
                 {
                     icon: 'home',
-                    title: 'Sweet Home',
+                    title: 'lv0',
                     to: {
                         path: '/'
+                    }
+                },
+                {
+                    icon: 'home',
+                    title: 'lv1',
+                    to: {
+                        path: '/lv1'
+                    }
+                },
+                {
+                    icon: 'home',
+                    title: 'lv2',
+                    to: {
+                        path: '/lv2'
+                    }
+                },
+                {
+                    icon: 'home',
+                    title: 'lv3',
+                    to: {
+                        path: '/lv3'
                     }
                 },
                 {
@@ -90,34 +116,57 @@ export default {
                 },
                 {
                     icon: 'face',
-                    title: 'header',
+                    title: '페이지 관리',
                     to: {
-                        path: '/header'
-                    }
-                },
-                {
-                    icon: 'live_help',
-                    title: '테스트',
-                    to: {
-                        path: '/test'
-                    }
-                },
-                {
-                    icon: 'image',
-                    title: '테스트2',
-                    to: {
-                        path: '/test2'
+                        path: '/page'
                     }
                 }
-            ],
-            title: `Vuetify.js - ${this.$apiRootPath}`
+                // {
+                //     icon: 'face',
+                //     title: 'header',
+                //     to: {
+                //         path: '/header'
+                //     }
+                // },
+                // {
+                //     icon: 'live_help',
+                //     title: '테스트',
+                //     to: {
+                //         path: '/test'
+                //     }
+                // },
+                // {
+                //     icon: 'image',
+                //     title: '테스트2',
+                //     to: {
+                //         path: '/test2'
+                //     }
+                // }
+            ]
         }
+    },
+    mounted () {
+        this.getSite()
     },
     methods: {
         signOut () {
+            // localStorage.clear() // localStorage 를 모두 삭제
+            // localStorage.removeItem('uId')
             // localStorage.removeItem('token')
+
             this.$store.commit('delToken')
             this.$router.push('/')
+        },
+        getSite () {
+            // routes.js 에서 axios 공통 설정해놨다
+            this.$axios.get('/site')
+                .then(r => {
+                    cosnole.log(r.data.d)
+                    this.siteTitle = r.data.d.title
+                    this.siteCopyright = r.data.d.copyright
+                    this.siteDark = r.data.d.dark
+                })
+                .catch(e => console.error(e.message))
         }
     }
 }

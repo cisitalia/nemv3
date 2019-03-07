@@ -3,6 +3,35 @@ const jwt = require('jsonwebtoken')
 const key = 'veryveryhardkey'
 
 /*
+const signToken = (id, lv, name) => {
+    return new Promise((resolve, reject) => {
+        jwt.sign({ id, lv, name }, key, (err, token) => {
+            if (err) reject(err)
+            resolve(token)
+        })
+    })
+}
+*/
+// async ~ await 로 바꾼 것
+const signToken = async (id, lv, name) => {
+    try {
+        const token = await jwt.sign({ id, lv, name }, key)
+        if(!token) throw new Error('token not made')
+        return token
+    } catch (e) {
+        console.error(e.message)
+    }
+}
+
+signToken('test1', '2', 'test1').then(console.log)
+
+
+/*
+// jwt
+const jwt = require('jsonwebtoken')
+const key = 'veryveryhardkey'
+
+
 const User = require('./models/users')
 
 // connect mongoose
@@ -70,6 +99,8 @@ const findOneUser = async name => {
 findOneUser('aaa').then(console.log)
  */
 
+ ///////////////////////////////////////////////////////////////////////
+/*
  const asyncTest = async (i) => {
      if (i > 10) throw new Error('not valid!')
      return i + 3
@@ -78,3 +109,43 @@ findOneUser('aaa').then(console.log)
  asyncTest(3)
     .then(r => console.log(r))
     .catch(e => console.error(e.message))
+ */
+
+ ///////////////////////////////////////////////////////////////////////
+/*
+// 프로미스 주의점 테스트
+ const tt = (p1, p2) => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (p1 === '' || p2 === '') reject(new Error('error'))
+            resolve(p1 + p2)
+        }, 1000)
+    })
+}
+
+const tt2 = () => {
+    // return { res: tt(1, 2) } // 객체를 리턴하는 경우. 프로미스는 제대로 동작하지 못함
+    return tt(1, 2)
+}
+
+// tt(1,2).then(console.log) // 성공
+
+// tt2().then(console.log) // error!
+// console.log(tt2()) // pending 걸림. error나 다름없다.
+
+// 아래처럼 아무리 체인을 만들어봐야 안된다.
+// return { res: r } 는 비동기와 상관없이 실행되므로 <pending> 된다.
+const res3 = tt2()
+                .then(r => {
+                    // console.log(r)
+                    // return r * 3
+                    const result = { res: r * 3 }
+                    console.log(result)
+                })
+                // .then(r => {
+                //     // return { res: r } // 의미없다.
+                //     console.log({ res: r })
+                // })
+
+// console.log(res3) // 무조건 <pending>
+ */

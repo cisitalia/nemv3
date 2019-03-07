@@ -1,6 +1,6 @@
-var express = require('express');
-var createError = require('http-errors');
-var router = express.Router();
+var express = require('express')
+var createError = require('http-errors')
+var router = express.Router()
 
 const jwt = require('jsonwebtoken')
 const cfg = require('../../../config')
@@ -18,11 +18,17 @@ const cfg = require('../../../config')
 
 // 로그인시 아이디/비번 검사 & 토큰발행하는 sign 모듈사용
 // /sign/in 으로 들어오는 로그인을 처리한다.
+// 토큰이 없는 상태로 접근해야 하므로 토큰검사 위에 위치해야 한다.
 router.use('/sign', require('./sign')) // sign 폴더
+
+router.use('/site', require('./site')) // site 폴더
 
 // 주어진 토큰을 키로 풀어내는 함수
 const verifyToken = (t) => {
     return new Promise((resolve, reject) => {
+        if (!t) resolve({ id: 'guest', name: '손님', lv: 3 })
+        if ((typeof t) !== 'string') reject(new Error('문자가 아닌 토큰입니다'))
+        if (t.length < 10) resolve({ id: 'guest', name: '손님', lv: 3 })
         jwt.verify(t, cfg.secretKey, (err, v) => {
             if (err) reject(err)
             resolve(v)
@@ -39,14 +45,42 @@ router.all('*', (req, res, next) => {
     const token = req.headers.authorization
     verifyToken(token)
         .then(v => {
-            console.log('decoded 토큰 : ')
-            console.log(v)
+            // console.log('decoded 토큰 : ')
+            // console.log(v)
+
+            // * req.user 변수에 유저정보를 넣는다. id/age/lv 정보가 들어있다
+            // 토큰을 풀어놓은 req.user는 중요한 데이터다!
+            req.user = v
             next()
         })
         .catch(e => {
             console.error('ERROR - token not valid')
             res.send({ success: false, msg: '[ERR01 - SignIn] ' + e.message })
         })
+})
+
+// 테스트 : http://localhost:3000/api/ 으로 들어가면 유저정보를 볼 수 있다.
+// router.all('*', (req, res, next) => {
+//     res.send({ reqUser: req.user })
+// })
+
+// * 토큰을 풀어서 만들어진 유저정보 req.user 는 이 밑의 라우터에서 잡을 수 있다.
+// 라우터 순서가 이렇게 중요하다.
+
+// 페이지 생성(관리자) 및 페이지 진입(레벨에 따라)을 막는 api
+router.use('/page', require('./page'))
+
+// 관리용 api : 유저와 페이지 관리 (관리자만 가능)
+router.use('/manage', require('./manage'))
+
+router.all('*', function (req, res, next) {
+
+    // 로그인한 유저의 토큰을 풀어놓은 정보는 req.user에 담겨있다
+    // console.log(req.user)
+
+    // 또 검사해도 됨
+    if (req.user.lv > 2) return res.send({ success: false, msg: '권한이 없습니다.' })
+    next()
 })
 
 // 라우터 모듈 분기
