@@ -14,6 +14,7 @@ router.all('*', function (req, res, next) {
 // 만 허용하겠다는 것임
 router.use('/user', require('./user'))
 router.use('/page', require('./page'))
+router.use('/site', require('./site'))
 
 router.all('*', function (req, res, next) {
     next(createError(404, '그런 api는 없다규'))

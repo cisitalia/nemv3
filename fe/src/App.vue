@@ -48,9 +48,15 @@
                         <v-list-tile @click="$router.push('/')">
                             <v-list-tile-title>홈</v-list-tile-title>
                         </v-list-tile>
-                        <v-list-tile v-if="!$store.state.token" @click="$router.push('/sign')">
-                            <v-list-tile-title>로그인</v-list-tile-title>
-                        </v-list-tile>
+                        <template v-if="!$store.state.token">
+                            <!-- <v-list-tile @click="$router.push('/sign')"> -->
+                            <v-list-tile @click="signIn">
+                                <v-list-tile-title>로그인</v-list-tile-title>
+                            </v-list-tile>
+                            <v-list-tile @click="register">
+                                <v-list-tile-title>회원가입</v-list-tile-title>
+                            </v-list-tile>
+                        </template>
                         <v-list-tile v-else @click="signOut">
                             <v-list-tile-title>로그아웃</v-list-tile-title>
                         </v-list-tile>
@@ -64,7 +70,7 @@
         </v-content>
 
         <v-footer fixed app>
-            <span>&copy; 2017 {{siteCopyright}} </span>
+            <span>{{siteCopyright}}</span>
         </v-footer>
     </v-app>
 </template>
@@ -120,6 +126,13 @@ export default {
                     to: {
                         path: '/page'
                     }
+                },
+                {
+                    icon: 'face',
+                    title: '사이트 관리',
+                    to: {
+                        path: '/site'
+                    }
                 }
                 // {
                 //     icon: 'face',
@@ -145,11 +158,23 @@ export default {
             ]
         }
     },
-    mounted () {
+    created () {
+        // this.getSite() // mounted() 와 똑같네
+    },
+    mounted () { // 로딩시 axios 를 통하기 때문에 번쩍거리는 단점이 있다.
         this.getSite()
+        this.drawer = true
     },
     methods: {
-        signOut () {
+        signIn () {
+            this.$router.push('/sign')
+            this.drawer = false
+        },
+        register () {
+            this.$router.push('/register')
+            this.drawer = false
+        },
+        signOut () { // 로그아웃시 동작
             // localStorage.clear() // localStorage 를 모두 삭제
             // localStorage.removeItem('uId')
             // localStorage.removeItem('token')
@@ -157,11 +182,11 @@ export default {
             this.$store.commit('delToken')
             this.$router.push('/')
         },
-        getSite () {
+        getSite () { // 초기에 사이트 정보를 가져온다.
             // routes.js 에서 axios 공통 설정해놨다
             this.$axios.get('/site')
                 .then(r => {
-                    cosnole.log(r.data.d)
+                    // console.log(r.data.d)
                     this.siteTitle = r.data.d.title
                     this.siteCopyright = r.data.d.copyright
                     this.siteDark = r.data.d.dark

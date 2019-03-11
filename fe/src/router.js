@@ -14,14 +14,14 @@ Vue.prototype.$apiRootPath = apiRootPath
 
 // axios 공용 권한 설정 - 단 한번 저장된다.(동적변경이 필요 - 인터셉터)
 axios.defaults.baseURL = apiRootPath // add
-// axios.defaults.headers.common['Authorization'] = localStorage.getItem('token') // add
+// axios.defaults.headers.common['Authorization'] = localStorage.getItem('token') // add - 토큰지정(갱신이 안되서 주석)
 
 // ** axios 인터셉터 : api로 보내는 axios 중간에 인터셉트한다
 // Add a request interceptor
 axios.interceptors.request.use(function (config) {
     // Do something before request is sent
     // console.log(config)
-    config.headers.Authorization = localStorage.getItem('token') // add
+    config.headers.Authorization = localStorage.getItem('token') // add - 토큰 발급 및 갱신
     return config
 }, function (error) {
     // Do something with request error
@@ -86,6 +86,9 @@ const pageCheck = (to, from, next) => {
         })
 }
 
+// 해당 컴포넌트로 이동시키는 메소드 (https://codesandbox.io/s/y3504yr0l1?from-embed)
+const useComponent = component => () => import(`./views/${component}.vue`)
+
 export default new Router({
     mode: 'history',
     base: process.env.BASE_URL,
@@ -93,13 +96,13 @@ export default new Router({
         {
             path: '/',
             name: 'lv0',
-            component: () => import('./views/lv0'),
+            component: useComponent('lv0'),
             beforeEnter: pageCheck
         },
         {
             path: '/lv1',
             name: 'lv1',
-            component: () => import('./views/lv1'),
+            component: useComponent('lv1'),
             beforeEnter: pageCheck
         },
         {
@@ -117,40 +120,50 @@ export default new Router({
         {
             path: '/user',
             name: '사용자',
-            component: () => import('./views/user'),
+            component: useComponent('user'),
             beforeEnter: pageCheck
         },
         {
             path: '/page',
             name: '페이지',
-            component: () => import('./views/page'),
+            component: useComponent('page'),
+            beforeEnter: pageCheck
+        },
+        {
+            path: '/site',
+            name: '사이트',
+            component: useComponent('site'),
             beforeEnter: pageCheck
         },
         {
             path: '/block/:msg',
             name: '차단',
-            component: () => import('./views/block')
+            component: useComponent('block')
         },
         {
             path: '/test',
             name: 'test',
-            component: () => import('./views/Test')
+            component: useComponent('Test')
         },
         {
             path: '/test2',
             name: 'test2',
-            component: () => import('./views/Test2')
+            component: useComponent('Test2')
         },
         {
             path: '/sign',
             name: '로그인',
-            component: () => import('./views/sign')
+            component: useComponent('sign')
         },
-
+        {
+            path: '/register',
+            name: '회원가입',
+            component: useComponent('register')
+        },
         {
             path: '*',
             name: 'e404',
-            component: () => import('./views/e404')
+            component: useComponent('e404')
         }
         // {
         //     path: '/',

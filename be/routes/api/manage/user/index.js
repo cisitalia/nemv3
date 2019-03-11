@@ -14,9 +14,9 @@ router.get('/', function (req, res, next) {
         })
 })
 
-router.put('/:id', (req, res, next) => {
-    const id = req.params.id
-    User.updateOne({ _id: id }, { $set: req.body })
+router.put('/:_id', (req, res, next) => {
+    const _id = req.params._id
+    User.updateOne({ _id }, { $set: req.body })
         .then(r => {
             res.send({ success: true, msg: r })
         })
@@ -25,9 +25,9 @@ router.put('/:id', (req, res, next) => {
         })
 })
 
-router.delete('/:id', (req, res, next) => {
-    const id = req.params.id
-    User.deleteOne({ _id: id })
+router.delete('/:_id', (req, res, next) => {
+    const _id = req.params._id
+    User.deleteOne({ _id })
         .then(r => {
             res.send({ success: true, msg: r })
         })

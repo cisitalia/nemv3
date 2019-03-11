@@ -9,8 +9,19 @@
                     </v-toolbar>
                     <v-card-text>
                         <v-form>
-                            <v-text-field prepend-icon="person" v-model="form.id" label="Login" type="text"></v-text-field>
-                            <v-text-field prepend-icon="lock" v-model="form.pwd" label="Password" type="password"></v-text-field>
+                            <v-text-field
+                                v-model="form.id"
+                                prepend-icon="person"
+                                label="로그인"
+                                type="text"
+                            ></v-text-field>
+                            <v-text-field
+                                v-model="form.pwd"
+                                prepend-icon="lock"
+                                label="Password"
+                                type="password"
+                                @keydown="inputPwd"
+                            ></v-text-field>
                         </v-form>
                     </v-card-text>
                     <v-card-actions>
@@ -54,6 +65,11 @@ export default {
                     // location.href = '/header' // $router.push() 대신 이렇게 해도 된다
                 })
                 .catch(e => console.error(e.message))
+        },
+        inputPwd (e) {
+            if (e.keyCode === 13) {
+                this.signIn()
+            }
         }
     }
 }

@@ -5,7 +5,6 @@ var router = express.Router()
 const Site = require('../../../models/sites')
 
 router.get('/', function (req, res, next) {
-
     Site.findOne({})
         .then(r => {
             res.send({ success: true, d: r })

@@ -21,6 +21,11 @@ const cfg = require('../../../config')
 // 토큰이 없는 상태로 접근해야 하므로 토큰검사 위에 위치해야 한다.
 router.use('/sign', require('./sign')) // sign 폴더
 
+// 회원가입
+router.use('/register', require('./register')) // register 폴더
+
+// 사이트 관리는 타이틀,카피라이트,다크모드 등 사이트의 디자인 관련이다.
+// 때문에 권한과 상관없으니 여기 위치
 router.use('/site', require('./site')) // site 폴더
 
 // 주어진 토큰을 키로 풀어내는 함수

@@ -134,7 +134,8 @@ export default {
                 })
                 .catch(e => {
                     // eslint-disable-next-line
-                    console.error(e.message)
+                    // console.error(e.message)
+                    this.pop(e.message)
                 })
         },
         putDialog (user) {
