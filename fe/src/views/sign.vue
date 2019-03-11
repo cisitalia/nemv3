@@ -31,6 +31,21 @@
                 </v-card>
             </v-flex>
         </v-layout>
+
+        <v-snackbar
+            v-model="sb.act"
+            top
+        >
+            {{ sb.msg }}
+            <v-btn
+                :color="sb.color"
+                flat
+                @click="sb.act = false"
+            >
+                닫기
+            </v-btn>
+        </v-snackbar>
+
     </v-container>
 </template>
 
@@ -39,7 +54,12 @@ import axios from 'axios'
 
 export default {
     data: () => ({
-        form: { id: '', pwd: '' }
+        form: { id: '', pwd: '' },
+        sb: {
+            act: false,
+            msg: '',
+            color: 'warning'
+        }
     }),
     methods: {
         signIn () {
@@ -48,7 +68,8 @@ export default {
             // /header 경로로 보낸다.(후킹의 일종)
             axios.post(`${this.$apiRootPath}sign/in`, this.form)
                 .then(r => {
-                    if (!r.data.success) return console.error(r.data.msg)
+                    // if (!r.data.success) return console.error(r.data.msg)
+                    if (!r.data.success) throw new Error(`[서버에러]: ${r.data.msg}`)
 
                     // 토큰 저장
                     localStorage.setItem('token', r.data.token)
@@ -60,16 +81,29 @@ export default {
                     localStorage.setItem('uLv', r.data.ui.lv)
                     this.$store.commit('getLoginUserInfo', r.data.ui)
 
-                    this.$router.push('/')
+                    // this.$router.push('/')
+                    // 유저레벨에 맞는 페이지로 이동 하도록 변경
+                    if (r.data.ui.lv > 0) {
+                        this.$router.push(`/lv${r.data.ui.lv}`)
+                    } else {
+                        this.$router.push('/')
+                    }
+
                     // this.$router.push('/header')
                     // location.href = '/header' // $router.push() 대신 이렇게 해도 된다
                 })
-                .catch(e => console.error(e.message))
+                // .catch(e => console.error(e.message))
+                .catch(e => this.pop(e.message, 'error'))
         },
         inputPwd (e) {
             if (e.keyCode === 13) {
                 this.signIn()
             }
+        },
+        pop (m, cl) {
+            this.sb.act = true
+            this.sb.msg = m
+            this.sb.color = cl
         }
     }
 }

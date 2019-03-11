@@ -2,6 +2,8 @@ var express = require('express');
 var createError = require('http-errors')
 var router = express.Router()
 
+const crypto = require('crypto')
+
 const jwt = require('jsonwebtoken')
 const cfg = require('../../../../config')
 const User = require('../../../models/users')
@@ -20,13 +22,15 @@ const signToken = (id, lv, name) => {
 // /sign/in 으로 들어오는 로그인시 아이디/비번/레벨 을 검사하고 토큰을 발행한다.
 router.post('/in', (req, res) => {
     const { id, pwd } = req.body
-    if (!id) return res.send({ success: false, msg: 'id not found!'})
-    if (!pwd) return res.send({ success: false, msg: 'password not found!'})
+    if (!id) return res.send({ success: false, msg: '아이디가 없습니다'})
+    if (!pwd) return res.send({ success: false, msg: '비밀번호가 없습니다'})
 
     // >> async ~ await 방식 : 훨씬 간결하다
     User.findOne({ id }).then(async r => {
             if (!r) throw new Error('존재하지 않는 아이디 입니다.')
-            if (r.pwd !== pwd) throw new Error('비밀번호가 틀리네요')
+            // if (r.pwd !== pwd) throw new Error('비밀번호가 틀리네요')
+            const p = await (crypto.scryptSync(pwd, r._id.toString(), 64, { N: 1024 }).toString('hex'))
+            if (r.pwd !== p) throw new Error('비밀번호가 틀립니다')
 
             const ui = { id: r.id, name: r.name, lv: r.lv, age: r.age }
             const token = await signToken(r.id, r.lv, r.name)

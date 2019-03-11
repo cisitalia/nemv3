@@ -1,7 +1,7 @@
 <template>
     <v-container>
         <v-alert type="info" :value="true">
-            레벨 3 {{ this.$store.state.userInfo.name }}
+            레벨 3 손님용 페이지
         </v-alert>
     </v-container>
 </template>

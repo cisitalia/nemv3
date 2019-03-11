@@ -12,6 +12,7 @@ const signToken = (id, lv, name) => {
     })
 }
 */
+/*
 // async ~ await 로 바꾼 것
 const signToken = async (id, lv, name) => {
     try {
@@ -24,7 +25,7 @@ const signToken = async (id, lv, name) => {
 }
 
 signToken('test1', '2', 'test1').then(console.log)
-
+ */
 
 /*
 // jwt
@@ -149,3 +150,30 @@ const res3 = tt2()
 
 // console.log(res3) // 무조건 <pending>
  */
+
+ ///////////////////////////////////////////////////////////////////////
+ // 암호화 테스트
+const crypto = require('crypto')
+
+ // Using the factory defaults
+// const key1 = crypto.scryptSync('secret', 'salt', 64)
+// console.log(key1.toString('hex'))
+// const key2 = crypto.scryptSync('secret', 'salt', 64, { N: 1024 })
+// console.log(key2.toString('hex'))
+
+// const registPwd = '1234' // 회원가입시 저장된 비번
+// const dbPwd = crypto.scryptSync(registPwd, 'salt', 64, { N: 1024 }).toString('hex') // 암호화된 문자를 db에 저장
+// const inputPwd = '1234' // 로그인시 12345 로 치고 들어옴(틀린 비번)
+// const userPwd = crypto.scryptSync(inputPwd, 'salt', 64, { N: 1024 }).toString('hex') // 암호화된 문자열로 변경
+// if (userPwd === dbPwd) console.log('비번 같음')
+// else console.log('비번이 틀리네')
+
+// 소금 뿌리기
+// const dbPwd = crypto.scryptSync('1234', '소금1', 64, { N: 1024 }).toString('hex') // 암호화된 문자를 db에 저장
+// const dbPwd2 = crypto.scryptSync('1234', '소금2', 64, { N: 1024 }).toString('hex') // 암호화된 문자를 db에 저장
+// console.log(dbPwd)
+// console.log(dbPwd2)
+
+const bf = Buffer.alloc(64)
+const s = crypto.randomFillSync(bf)
+console.log(s.toString('hex'))

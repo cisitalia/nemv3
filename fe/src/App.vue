@@ -87,30 +87,30 @@ export default {
             items: [
                 {
                     icon: 'home',
-                    title: 'lv0',
+                    title: '손님용 페이지',
                     to: {
-                        path: '/'
+                        path: '/lv3'
                     }
                 },
                 {
-                    icon: 'home',
-                    title: 'lv1',
-                    to: {
-                        path: '/lv1'
-                    }
-                },
-                {
-                    icon: 'home',
-                    title: 'lv2',
+                    icon: 'pets',
+                    title: '일반유저용 페이지',
                     to: {
                         path: '/lv2'
                     }
                 },
                 {
-                    icon: 'home',
-                    title: 'lv3',
+                    icon: 'offline_bolt',
+                    title: '슈퍼유저용 페이지',
                     to: {
-                        path: '/lv3'
+                        path: '/lv1'
+                    }
+                },
+                {
+                    icon: 'supervisor_account',
+                    title: '관리자용 페이지',
+                    to: {
+                        path: '/'
                     }
                 },
                 {
@@ -121,14 +121,14 @@ export default {
                     }
                 },
                 {
-                    icon: 'face',
+                    icon: 'bookmarks',
                     title: '페이지 관리',
                     to: {
                         path: '/page'
                     }
                 },
                 {
-                    icon: 'face',
+                    icon: 'settings',
                     title: '사이트 관리',
                     to: {
                         path: '/site'
@@ -180,7 +180,7 @@ export default {
             // localStorage.removeItem('token')
 
             this.$store.commit('delToken')
-            this.$router.push('/')
+            this.$router.push('/lv3')
         },
         getSite () { // 초기에 사이트 정보를 가져온다.
             // routes.js 에서 axios 공통 설정해놨다

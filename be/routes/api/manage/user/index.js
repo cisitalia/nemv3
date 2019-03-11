@@ -6,6 +6,7 @@ const User = require('../../../../models/users')
 
 router.get('/', function (req, res, next) {
     User.find()
+        .select('-pwd') // 비밀번호는 가져오지 않는다
         .then(r => {
             res.send({ success: true, users: r })
         })
