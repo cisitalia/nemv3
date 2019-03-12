@@ -35,8 +35,8 @@
                 <v-icon>loop</v-icon>
             </v-btn> -->
             <v-toolbar-title v-text="siteTitle"></v-toolbar-title>
-            <v-toolbar-title>
-            {{ this.$store.state.userInfo.name }}
+            <v-toolbar-title v-if="this.$store.state.userInfo.name">
+                {{ this.$store.state.userInfo.name }}
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-toolbar-items>
