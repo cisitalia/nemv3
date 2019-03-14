@@ -10,9 +10,17 @@ const User = require('../../../models/users')
 
 // 로그인 토큰 생성 함수
 // [2019.3.5] id, lv, name 으로 변경
-const signToken = (id, lv, name) => {
+// [2019.3.14] rmb(remember) 추가. 토큰갱신 기능 붙임
+const signToken = (id, lv, name, rmb) => {
     return new Promise((resolve, reject) => {
-        jwt.sign({ id, lv, name }, cfg.secretKey, (err, token) => {
+        const o = {
+            issuer: cfg.jwt.issuer,
+            subject: cfg.jwt.subject,
+            expiresIn: cfg.jwt.expiresIn,
+            algorithm: cfg.jwt.algorithm
+        }
+        if (rmb) o.expiresIn = cfg.jwt.expiresInRemember // 6일 보관
+        jwt.sign({ id, lv, name, rmb }, cfg.jwt.secretKey, o, (err, token) => {
             if (err) reject(err)
             resolve(token)
         })
@@ -21,19 +29,20 @@ const signToken = (id, lv, name) => {
 
 // /sign/in 으로 들어오는 로그인시 아이디/비번/레벨 을 검사하고 토큰을 발행한다.
 router.post('/in', (req, res) => {
-    const { id, pwd } = req.body
+    const { id, pwd, remember } = req.body
     if (!id) return res.send({ success: false, msg: '아이디가 없습니다'})
     if (!pwd) return res.send({ success: false, msg: '비밀번호가 없습니다'})
+    if (remember === undefined) return res.send({ success: false, msg: '기억하기가 없습니다.' })
 
     // >> async ~ await 방식 : 훨씬 간결하다
     User.findOne({ id }).then(async r => {
             if (!r) throw new Error('존재하지 않는 아이디 입니다.')
             // if (r.pwd !== pwd) throw new Error('비밀번호가 틀리네요')
-            const p = await (crypto.scryptSync(pwd, r._id.toString(), 64, { N: 1024 }).toString('hex'))
+            const p = await (crypto.scryptSync(pwd, r._id.toString(), 64, { N: 1024 }).toString('hex')) // 비번풀기
             if (r.pwd !== p) throw new Error('비밀번호가 틀립니다')
 
             const ui = { id: r.id, name: r.name, lv: r.lv, age: r.age }
-            const token = await signToken(r.id, r.lv, r.name)
+            const token = await signToken(r.id, r.lv, r.name, remember)
 
             res.send({ success: true, token: token, ui: ui })
         })

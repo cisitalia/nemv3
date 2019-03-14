@@ -29,7 +29,7 @@ router.post('/', function (req, res, next) {
             //   console.log(rs)
 
             // 토큰을 해제한 유저 정보는 req.user 에 담겨있고 이것을 d 객체에 담아 페이지에 보낸다
-            res.send({ success: true, d: req.user })
+            res.send({ success: true, d: req.user, token: req.token })
         })
         .catch((e) => {
             res.send({ success: false, msg: e.message })

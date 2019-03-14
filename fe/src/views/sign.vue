@@ -22,6 +22,10 @@
                                 type="password"
                                 @keydown="inputPwd"
                             ></v-text-field>
+                        <v-checkbox
+                            v-model="form.remember"
+                            label="암호 기억하기(최대 7일간 보관 됩니다)"
+                        ></v-checkbox>
                         </v-form>
                     </v-card-text>
                     <v-card-actions>
@@ -50,11 +54,13 @@
 </template>
 
 <script>
-import axios from 'axios'
-
 export default {
     data: () => ({
-        form: { id: '', pwd: '' },
+        form: {
+            id: '',
+            pwd: '',
+            remember: false
+        },
         sb: {
             act: false,
             msg: '',
@@ -66,7 +72,7 @@ export default {
             // 로그인 아이디/비번 검사 후 토큰을 발행받는다.
             // 토큰은 localStorage 에 저장한 후 vuex(스토어)에도 저장한다
             // /header 경로로 보낸다.(후킹의 일종)
-            axios.post(`${this.$apiRootPath}sign/in`, this.form)
+            this.$axios.post('sign/in', this.form)
                 .then(r => {
                     // if (!r.data.success) return console.error(r.data.msg)
                     if (!r.data.success) throw new Error(`[서버에러]: ${r.data.msg}`)

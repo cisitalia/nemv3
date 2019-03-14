@@ -153,7 +153,7 @@ const res3 = tt2()
 
  ///////////////////////////////////////////////////////////////////////
  // 암호화 테스트
-const crypto = require('crypto')
+// const crypto = require('crypto')
 
  // Using the factory defaults
 // const key1 = crypto.scryptSync('secret', 'salt', 64)
@@ -174,6 +174,94 @@ const crypto = require('crypto')
 // console.log(dbPwd)
 // console.log(dbPwd2)
 
-const bf = Buffer.alloc(64)
-const s = crypto.randomFillSync(bf)
-console.log(s.toString('hex'))
+// const bf = Buffer.alloc(64)
+// const s = crypto.randomFillSync(bf)
+// console.log(s.toString('hex'))
+
+///////////////////////////////////////////////////////////////////////
+// moment.js test
+
+const moment = require('moment')
+moment.locale('ko') // 한글화
+const showTime = t => console.log(t)
+const echo = showTime
+
+// console.log(moment())
+// console.log(moment().toDate())
+
+// console.log(moment().format('YYMMDD')) // 190314
+// console.log(moment().hours()) // 11
+
+// console.log(moment().hours(3).toLocaleString())
+// console.log(moment().add(33, 'minutes'.toLocaleString()))
+
+// console.log(moment().fromNow()) // a few seconds ago => 몇 초 전
+// console.log(moment().add(-5, 'hours').fromNow()) // 5 hours ago // 5시간 전
+// console.log(moment().add(5, 'hours').fromNow()) // in 5 hours // 5시간 후
+// console.log(moment().add(-40, 'hours').fromNow()) // 2일 전
+// console.log(moment().add(10, 'hours').fromNow()) // 10시간 후
+
+// [중요] 시간비교
+// const ct = moment() // 현재시간
+// const bt = moment().add(-1, 'hours') // 한시간전
+
+// console.log(ct.diff(bt)) // 3600000
+// console.log(ct.diff(bt, 'seconds')) // 3600
+
+// console.log(bt.diff(ct)) // -3600000
+// console.log(bt.diff(ct, 'second')) // -3600
+
+// console.log(moment().day(-7))
+
+// console.log(moment().add(40,'hours').format('YYYY-MM-DD'))
+
+// console.log(moment([2015, 25, 35]).format()) //  Invalid date
+
+// console.log(moment().seconds(30).valueOf() === new Date().setSeconds(30))
+
+// showTime(moment().date(15).format('YY-MM-DD'))
+
+// showTime(moment().date(19).month(0).year(2020).format('YYYY.MM.DD'))
+
+// showTime(moment().day(-7))
+// showTime(moment().day(0))
+// showTime(moment().day(7))
+
+// showTime(moment().day('Sunday'))
+// showTime(moment().day('일'))
+
+// 이번주 일 ~ 토 날짜
+// showTime(moment().weekday(0)) // 2019-03-10 sunday
+// showTime(moment().weekday(1)) // ... 11 monday
+// showTime(moment().weekday(2)) // .. 12 tuesday
+// showTime(moment().weekday(3))
+// showTime(moment().weekday(4))
+// showTime(moment().weekday(5))
+// showTime(moment().weekday(6))
+
+// showTime(moment().dayOfYear()) // 1년 중 오늘은 며칠째인가 1 ~ 366
+// echo(moment().weeks()) // 1년 중 몇번째 주인가
+
+// 윤년 계산따위 걱정없다
+// echo(moment('2019-02-28').add(1, 'days').format('YYYY-MM-DD')) // 2019-03-01
+// echo(moment('2020-02-28').add(1, 'days').format('YYYY-MM-DD')) // 2020-02-29
+
+// 요일명. 한글화 했기 때문에 한글로 나온다.
+// echo(moment.weekdays()) // [ '일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일' ]
+// echo(moment.weekdaysShort()) // [ '일', '월', '화', '수', '목', '금', '토' ]
+// echo(moment.weekdaysMin()) // [ '일', '월', '화', '수', '목', '금', '토' ]
+
+// 오늘의 요일 얻기
+echo(moment().day()) // [0 ~ 6]
+echo(moment.weekdays(moment().day())) // 오늘의 요일명 얻기
+
+// 해당 월의 일수 구하기
+// echo(moment("2020-02", "YYYY-MM").daysInMonth()) // 29
+// echo(moment("2019-01", "YYYY-MM").daysInMonth()) // 31
+
+// toString() 으로 문자열화 하기
+// echo(moment().toString())
+
+// toObject() 로 객체로 리턴받기 { years, months, date, hours, minutes, secondes,... }
+// echo(moment().toObject())
+// echo(moment().toObject().date) // 14

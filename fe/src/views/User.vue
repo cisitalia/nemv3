@@ -46,6 +46,7 @@ export default {
     }),
     mounted () {
         this.getUsers()
+        // console.log(this.$moment().format('YYYY.MM.DD')) // 현재 날짜-시간
     },
     methods: {
         getUsers () {

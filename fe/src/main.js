@@ -7,9 +7,15 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
+// use moment
+import moment from 'moment'
+import VueMomentJS from 'vue-momentjs'
+moment.locale('ko') // 한글화
+
 Vue.config.productionTip = false
 
 Vue.use(VeeValidate)
+Vue.use(VueMomentJS, moment)
 
 // Validator.localize('ko', ko)
 

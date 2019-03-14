@@ -32,16 +32,11 @@ axios.interceptors.request.use(function (config) {
 axios.interceptors.response.use(function (response) {
     // Do something with response data
     // console.log(response)
-    // if(response.data) console.log(response.data) // 받아오는 데이터를 찍어보자
-    // if (response.data.token) { // 토큰 인터셉터
-    //     console.log(response.data.token)
-    //     // 서버에서 응답으로 받아온 토큰이 있는 경우 적용
-    //     localStorage.setItem('token', response.data.token)
-    //     this.$store.commit('getToken') // >>>> 문제는 얘가 안됨. axios 안에서 this.$store가 없음
-    // }
 
-    // > 토큰 재발급 처리를 여기서 한다
-
+    // > 토큰을 재발급받으면 여기서 가로챈 후 로컬스토리지에 저장한다.
+    const token = response.data.token
+    // console.log(token)
+    if (token) localStorage.setItem('token', token)
     return response
 }, function (error) {
     // Do something with response error
@@ -60,23 +55,6 @@ const pageCheck = (to, from, next) => {
 
             // 라우터로 넘어오는 r.data.d(유저정보)를 사용하려하였으나 에러가 많아서 포기
             // sign 으로 로그인시 유저정보를 패칭하는 것으로 정리
-
-            // ** r.data.d 에 로그인한 유저정보가 담겨왔다
-            // console.log(r.data.d)
-            // localStorage.setItem('lsId', r.data.d.id)
-            // localStorage.setItem('lsName', r.data.d.name)
-            // localStorage.setItem('lsLv', r.data.d.lv)
-
-            // 아이디,이름,레벨
-            // const uId = r.data.d.id
-            // const uName = r.data.d.name
-            // const uLv = r.data.d.lv
-
-            // * this.$store.state ~~ 이렇게는 접근자체가 안됨
-
-            // use store
-            // store.commit('setUserId', uId) // user id 만 저장
-            // store.commit('setUserInfo', r.data.d) // 모든 유저정보 저장
 
             next()
         })

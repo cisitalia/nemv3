@@ -5,6 +5,8 @@ var router = express.Router()
 const jwt = require('jsonwebtoken')
 const cfg = require('../../../config')
 
+const moment = require('moment')
+
 //////////////////////////////////////////////////////////////
 // 미들웨어 - 미들웨어는 별거없다.
 // 라우터 타고 들어오는 경로의 중간에 먼저 실행할 것이 있으면
@@ -34,24 +36,74 @@ const verifyToken = (t) => {
         if (!t) resolve({ id: 'guest', name: '손님', lv: 3 })
         if ((typeof t) !== 'string') reject(new Error('문자가 아닌 토큰입니다'))
         if (t.length < 10) resolve({ id: 'guest', name: '손님', lv: 3 })
-        jwt.verify(t, cfg.secretKey, (err, v) => {
+        jwt.verify(t, cfg.jwt.secretKey, (err, v) => {
             if (err) reject(err)
             resolve(v)
         })
     })
 }
 
+// be/routes/api/sign/index.js 에 있는 signToken() 임
+const signToken = (id, lv, name, rmb) => {
+    return new Promise((resolve, reject) => {
+        const o = {
+            issuer: cfg.jwt.issuer,
+            subject: cfg.jwt.subject,
+            expiresIn: cfg.jwt.expiresIn,
+            algorithm: cfg.jwt.algorithm
+        }
+        if (rmb) o.expiresIn = cfg.jwt.expiresInRemember // 6일 보관
+        jwt.sign({ id, lv, name, rmb }, cfg.jwt.secretKey, o, (err, token) => {
+            if (err) reject(err)
+            resolve(token)
+        })
+    })
+}
+
+// 토큰 재발급 함수 - 토큰만료시간 체크, verifyToken(t) 도 같이 행한다.
+const getToken = async (t) => {
+    let vt = await verifyToken(t) // 토큰을 풀자
+
+    if(vt.lv > 2) return { user: vt, token: null } // 손님계정은 그냥 나감
+
+    const diff = moment(vt.exp * 1000).diff(moment(), 'seconds')
+    // console.log(diff)
+
+    // 60초 보다 크면 그냥 나감
+    if (diff > (vt.exp - vt.iat) / cfg.jwt.expiresInDiv) return { user: vt, token: null }
+
+    // 60초보다 작으면 토큰 재발행
+    const nt = await signToken(vt.id, vt.lv, vt.name, vt.rmb)
+    vt = await verifyToken(nt)
+    return { user: vt, token: nt }
+}
+
 // 로그인 토큰검사 미들웨어 - 토큰이 있어야 검사할 수 있으니 sign 밑에 등록해야 함
 // 로그인시 발행받은 토큰의 유무와 유효성을 판단한다.
 // 발행받은 토큰이 없는 경우 여기를 지나가지 못한다.
+// fe/src/router.js 에서 axios 헤더의 Authorization 에 실어보낸 토큰을 풀어서 검사한다.
 router.all('*', (req, res, next) => {
-    // fe/src/views/header.vue 에서 헤더의 Authorization 에 실어보낸 토큰을
-    // 여기서 풀어서 verifyToken() 으로 검사한다.
+    // 토큰 만료시간 체크와 재발행을 겸하는 함수로 대체
+    getToken(req.headers.authorization)
+        .then(v => {
+            console.log(v) // 전체 토큰 객체를 찍어본다
+            req.user = v.user
+            req.token = v.token
+            next()
+        })
+        .catch(e => {
+            console.error('ERROR - token not valid')
+            res.send({ success: false, msg: '[ERR01 - SignIn] ' + e.message })
+        })
+    /*
     const token = req.headers.authorization
     verifyToken(token)
         .then(v => {
-            // console.log('decoded 토큰 : ')
-            // console.log(v)
+            // 생성된 토큰을 찍어본다.
+            console.log(v) // 전체 토큰 객체를 찍어본다
+            console.log(new Date(v.exp * 1000)) // 만료시간만 찍어보자
+            const diff = moment(v.exp * 1000).diff(moment(), 'seconds') // 만료시간과 현재시간을 차를 초로 구한다.
+            console.log(diff) // 차이(초)를 찍어본다
 
             // * req.user 변수에 유저정보를 넣는다. id/age/lv 정보가 들어있다
             // 토큰을 풀어놓은 req.user는 중요한 데이터다!
@@ -62,6 +114,7 @@ router.all('*', (req, res, next) => {
             console.error('ERROR - token not valid')
             res.send({ success: false, msg: '[ERR01 - SignIn] ' + e.message })
         })
+    */
 })
 
 // 테스트 : http://localhost:3000/api/ 으로 들어가면 유저정보를 볼 수 있다.

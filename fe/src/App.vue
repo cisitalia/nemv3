@@ -38,6 +38,9 @@
             <v-toolbar-title v-if="this.$store.state.userInfo.name">
                 {{ this.$store.state.userInfo.name }}
             </v-toolbar-title>
+            <v-toolbar-title>
+                [{{ this.$moment().format('YYYY.MM.DD') }} {{ this.$moment.weekdays(this.$moment().day()) }} 입니다.]
+            </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-toolbar-items>
                 <v-menu bottom left>
