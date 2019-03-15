@@ -49,7 +49,7 @@ const signToken = (id, lv, name, rmb) => {
         const o = {
             issuer: cfg.jwt.issuer,
             subject: cfg.jwt.subject,
-            expiresIn: cfg.jwt.expiresIn,
+            expiresIn: cfg.jwt.expiresIn, // 3분
             algorithm: cfg.jwt.algorithm
         }
         if (rmb) o.expiresIn = cfg.jwt.expiresInRemember // 6일 보관
@@ -67,7 +67,7 @@ const getToken = async (t) => {
     if(vt.lv > 2) return { user: vt, token: null } // 손님계정은 그냥 나감
 
     const diff = moment(vt.exp * 1000).diff(moment(), 'seconds')
-    // console.log(diff)
+    if (process.env.NODE_ENV === 'development') console.log(diff)
 
     // 60초 보다 크면 그냥 나감
     if (diff > (vt.exp - vt.iat) / cfg.jwt.expiresInDiv) return { user: vt, token: null }
@@ -78,7 +78,7 @@ const getToken = async (t) => {
     return { user: vt, token: nt }
 }
 
-// 로그인 토큰검사 미들웨어 - 토큰이 있어야 검사할 수 있으니 sign 밑에 등록해야 함
+// [로그인 토큰검사 미들웨어] - 토큰이 있어야 검사할 수 있으니 sign 밑에 등록해야 함
 // 로그인시 발행받은 토큰의 유무와 유효성을 판단한다.
 // 발행받은 토큰이 없는 경우 여기를 지나가지 못한다.
 // fe/src/router.js 에서 axios 헤더의 Authorization 에 실어보낸 토큰을 풀어서 검사한다.
@@ -86,14 +86,20 @@ router.all('*', (req, res, next) => {
     // 토큰 만료시간 체크와 재발행을 겸하는 함수로 대체
     getToken(req.headers.authorization)
         .then(v => {
-            console.log(v) // 전체 토큰 객체를 찍어본다
+            if (process.env.NODE_ENV === 'development') {
+                console.log(':: be/routes/api/index.js 에서 찍어봄 ::')
+                console.log(moment().format('YYYY-MM-DD HH:mm:ss'))
+                console.log(v) // 전체 토큰 객체를 찍어본다
+            }
             req.user = v.user
             req.token = v.token
             next()
         })
-        .catch(e => {
-            console.error('ERROR - token not valid')
-            res.send({ success: false, msg: '[ERR01 - SignIn] ' + e.message })
+        .catch(e => { // 토큰검사시 에러가 발생하면 이쪽으로 온다.
+            if (process.env.NODE_ENV === 'development') {
+                console.error('ERROR - token not valid')
+            }
+            res.send({ success: false, msg: '[ERR01-TOKEN] ' + e.message })
         })
     /*
     const token = req.headers.authorization
@@ -125,10 +131,11 @@ router.all('*', (req, res, next) => {
 // * 토큰을 풀어서 만들어진 유저정보 req.user 는 이 밑의 라우터에서 잡을 수 있다.
 // 라우터 순서가 이렇게 중요하다.
 
-// 페이지 생성(관리자) 및 페이지 진입(레벨에 따라)을 막는 api
+// [방화벽 미들웨어] 페이지 생성(관리자) 및 페이지 진입(레벨에 따라)을 막는 api
 router.use('/page', require('./page'))
 
-// 관리용 api : 유저와 페이지 관리 (관리자만 가능)
+// 관리용 api : 관리자만 접근가능 가능
+// 위에서 생성한 req.user 를 이용해 req.user.lv 로 관리자 인증시도
 router.use('/manage', require('./manage'))
 
 router.all('*', function (req, res, next) {
@@ -141,7 +148,7 @@ router.all('*', function (req, res, next) {
     next()
 })
 
-// 라우터 모듈 분기
+// 라우터 모듈 분기 - 아래 api는 보호받고 있다
 router.use('/test', require('./test')) // test 폴더
 router.use('/user', require('./user')) // user 폴더
 

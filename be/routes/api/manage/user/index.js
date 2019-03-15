@@ -42,4 +42,4 @@ router.all('*', function (req, res, next) {
     next(createError(404, '그런 api는 없다규 test'))
 });
 
-module.exports = router;
+module.exports = router

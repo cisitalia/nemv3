@@ -4,7 +4,7 @@ import axios from 'axios'
 // import Home from './views/Home.vue'
 
 // vuex store 를 쓰기 위해서
-// import store from './store.js'
+import store from './store.js'
 
 Vue.use(Router)
 
@@ -44,23 +44,40 @@ axios.interceptors.response.use(function (response) {
 })
 // ** axios 인터셉터 끝
 
-// 페이지체크가 필요한 페이지는 접근이 레벨에 따라 제한되어있다.
-// 해당 페이지에 접근하기 위해서는 api/page 에 post 접근을 통해 승인받아야 한다.
+// [미들웨어 - 방화벽이자 인터셉터]
+// 페이지체크가 필요한 페이지는 접근이 레벨에 따라 제한되어있다. 당연히 로그인 필요
+// 해당 페이지에 접근하기 위해서는 be/routes/api/page 에 post 접근을 통해 승인받아야 한다.
 // 성공하면 갈길 계속 가고, 실패가 리턴되면 /block/${msg} 로 빠진다
+// headers: Authorization : token 을 적용했으므로 이제 토큰유무(로그인유무)를 따지는데도 쓰이게 된다.
 const pageCheck = (to, from, next) => {
     // return next()
-    axios.post(`${apiRootPath}page`, { name: to.path.replace('/', '') }, { headers: { Authorization: localStorage.getItem('token') } })
+    // axios.post('page', { name: to.path.replace('/', '') }, { headers: { Authorization: localStorage.getItem('token') } })
+    axios.post('page', { name: to.path })
         .then((r) => {
+            // console.log(r.data)
             if (!r.data.success) throw new Error(r.data.msg)
 
             // 라우터로 넘어오는 r.data.d(유저정보)를 사용하려하였으나 에러가 많아서 포기
             // sign 으로 로그인시 유저정보를 패칭하는 것으로 정리
 
-            next()
+            next() // 가던길로 보낸다
         })
         .catch((e) => {
-            // console.error(e.message)
-            next(`/block/${e.message}`)
+            // 로그인이 필요한 페이지인데 로그인이 안되어있거나 권한이 없는 경우
+            // next(`/block/${e.message}`)
+            next(`/block/${e.message.replace(/\//gi, ' ')}`) // '/'를 공백처리
+
+            // * 토큰 유효기간이 끝난 경우 기존 토큰을 모두 삭제하고 로그인창으로 보낸다.
+            // * 난제 : 로그인 되었고 단지 레벨이 안맞을 뿐인데도 토큰을 삭제하는 문제가 발생함.
+            // * 해결 : 에러 문자열에서 '[ERR01-TOKEN] jwt expired' 이 있는지 검사한다.
+            // App.vue 의 signOut() 을 흉내낸다.
+            // this.$store는 안되므로 위에 import store from './store.js' 를 하고 아래처럼 store 만 해야 한다.
+            if (e.message.includes('ERR01-TOKEN') || e.message.includes('jwt expired')) {
+                setTimeout(() => {
+                    store.commit('delToken')
+                    location.href = '/sign'
+                }, 800)
+            }
         })
 }
 
@@ -72,61 +89,60 @@ export default new Router({
     base: process.env.BASE_URL,
     routes: [
         {
-            path: '/',
-            name: 'lv0',
-            component: useComponent('lv0'),
+            path: '/test/lv3',
+            name: 'testLv3',
+            component: () => import('./views/test/lv3'),
+            beforeEnter: pageCheck
+        },
+
+        {
+            path: '/test/lv2',
+            name: 'testLv2',
+            component: () => import('./views/test/lv2'),
+            beforeEnter: pageCheck
+        },
+
+        {
+            path: '/test/lv1',
+            name: 'testLv1',
+            component: useComponent('test/lv1'),
             beforeEnter: pageCheck
         },
         {
-            path: '/lv1',
-            name: 'lv1',
-            component: useComponent('lv1'),
+            path: '/test/lv0',
+            name: 'testLv0',
+            component: useComponent('test/lv0'),
+            beforeEnter: pageCheck
+        },
+
+        {
+            path: '/manage/users',
+            name: 'manageUsers',
+            component: useComponent('manage/users'),
             beforeEnter: pageCheck
         },
         {
-            path: '/lv2',
-            name: 'lv2',
-            component: () => import('./views/lv2'),
+            path: '/manage/pages',
+            name: 'managePages',
+            component: useComponent('manage/pages'),
             beforeEnter: pageCheck
         },
         {
-            path: '/lv3',
-            name: 'lv3',
-            component: () => import('./views/lv3'),
+            path: '/manage/sites',
+            name: 'manageSites',
+            component: useComponent('manage/sites'),
             beforeEnter: pageCheck
         },
         {
-            path: '/user',
-            name: '사용자',
-            component: useComponent('user'),
-            beforeEnter: pageCheck
-        },
-        {
-            path: '/page',
-            name: '페이지',
-            component: useComponent('page'),
-            beforeEnter: pageCheck
-        },
-        {
-            path: '/site',
-            name: '사이트',
-            component: useComponent('site'),
+            path: '/manage/boards',
+            name: 'manageBoards',
+            component: useComponent('manage/boards'),
             beforeEnter: pageCheck
         },
         {
             path: '/block/:msg',
             name: '차단',
             component: useComponent('block')
-        },
-        {
-            path: '/test',
-            name: 'test',
-            component: useComponent('Test')
-        },
-        {
-            path: '/test2',
-            name: 'test2',
-            component: useComponent('Test2')
         },
         {
             path: '/sign',
@@ -143,6 +159,16 @@ export default new Router({
             name: 'e404',
             component: useComponent('e404')
         }
+        // {
+        //     path: '/test',
+        //     name: 'test',
+        //     component: useComponent('Test')
+        // },
+        // {
+        //     path: '/test2',
+        //     name: 'test2',
+        //     component: useComponent('Test2')
+        // },
         // {
         //     path: '/',
         //     name: 'home',

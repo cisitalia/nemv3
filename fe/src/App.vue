@@ -3,29 +3,80 @@
         <v-navigation-drawer
         persistent
         v-model="drawer"
+        :mini-variant.sync="mini"
         enable-resize-watcher
         fixed
         app
         >
+            <v-toolbar flat class="transparent">
+                <v-list class="pa-0">
+                    <v-list-tile avatar>
+                        <v-list-tile-avatar>
+                            <v-badge
+                                overlap
+                                color="orange"
+                            >
+                                <v-icon
+                                    slot="badge"
+                                    dark
+                                    small
+                                >notifications</v-icon>
+                                <v-icon
+                                    large
+                                    color="grey darken-1"
+                                >
+                                    account_box
+                                </v-icon>
+                            </v-badge>
+                        </v-list-tile-avatar>
+                        <v-list-tile-content>
+                            <v-list-tile-title>관리자</v-list-tile-title>
+                        </v-list-tile-content>
+                        <v-list-tile-action>
+                            <v-btn icon @click.native.stop="mini = !mini">
+                                <v-icon>chevron_left</v-icon>
+                            </v-btn>
+                        </v-list-tile-action>
+                    </v-list-tile>
+                </v-list>
+            </v-toolbar>
+
             <v-list>
-                <v-list-tile
-                value="true"
-                v-for="(item, i) in items"
-                :key="i"
-                :to="item.to"
+                <v-list-group
+                    v-for="(item, i) in items"
+                    v-model="item.act"
+                    :prepend-icon="item.icon"
+                    :key="i"
+                    no-action
                 >
-                    <v-list-tile-action>
-                        <v-icon v-html="item.icon"></v-icon>
-                    </v-list-tile-action>
-                    <v-list-tile-content>
-                        <v-list-tile-title v-text="item.title"></v-list-tile-title>
-                    </v-list-tile-content>
-                </v-list-tile>
+                    <v-list-tile slot="activator">
+                        <v-list-tile-content>
+                            <v-list-tile-title>{{ item.title }}</v-list-tile-title>
+                        </v-list-tile-content>
+                    </v-list-tile>
+                    <v-list-tile
+                        v-for="(subItem, n) in item.subItems"
+                        :key="subItem.title"
+                        :to="subItem.to"
+                        :prepend-icon="subItem.icon"
+                        @mouseover="showByIndex=n"
+                        @mouseout="showByIndex=null"
+                    >
+                        <v-list-tile-content>
+                            <v-list-tile-title>{{ subItem.title }}</v-list-tile-title>
+                        </v-list-tile-content>
+                        <v-list-tile-action v-show="showByIndex === n">
+                            <v-icon
+                                @click.stop.prevent="subItem.action(i, n)"
+                            >{{ subItem.icon }}</v-icon>
+                        </v-list-tile-action>
+                    </v-list-tile>
+                </v-list-group>
             </v-list>
         </v-navigation-drawer>
 
         <v-toolbar
-        app
+            app
         >
             <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
             <!-- <v-btn
@@ -83,59 +134,92 @@ export default {
     name: 'App',
     data () {
         return {
+            showByIndex: null,
             drawer: null,
+            mini: false,
             siteTitle: '기다리는 중',
             siteCopyright: '기다리는 중',
             siteDark: false,
             items: [
                 {
-                    icon: 'home',
-                    title: '손님용 페이지',
-                    to: {
-                        path: '/lv3'
-                    }
-                },
-                {
-                    icon: 'pets',
-                    title: '일반유저용 페이지',
-                    to: {
-                        path: '/lv2'
-                    }
-                },
-                {
-                    icon: 'offline_bolt',
-                    title: '슈퍼유저용 페이지',
-                    to: {
-                        path: '/lv1'
-                    }
-                },
-                {
-                    icon: 'supervisor_account',
-                    title: '관리자용 페이지',
-                    to: {
-                        path: '/'
-                    }
-                },
-                {
-                    icon: 'face',
-                    title: '사용자 관리',
-                    to: {
-                        path: '/user'
-                    }
-                },
-                {
-                    icon: 'bookmarks',
-                    title: '페이지 관리',
-                    to: {
-                        path: '/page'
-                    }
+                    icon: 'pan_tool',
+                    title: '레벨테스트',
+                    act: true,
+                    subItems: [
+                        {
+                            icon: 'home',
+                            title: '손님용 페이지',
+                            to: {
+                                path: '/test/lv3'
+                            },
+                            action: (i, n) => {
+                                console.log('>> ' + this.items[i].subItems[n].to.path)
+                                console.log('ggggg-' + i + '- ' + n)
+                            }
+                        },
+                        {
+                            icon: 'pets',
+                            title: '일반유저용 페이지',
+                            to: {
+                                path: '/test/lv2'
+                            },
+                            action: this.subAction
+                        },
+                        {
+                            icon: 'offline_bolt',
+                            title: '슈퍼유저용 페이지',
+                            to: {
+                                path: '/test/lv1'
+                            },
+                            action: this.subAction
+                        },
+                        {
+                            icon: 'supervisor_account',
+                            title: '관리자용 페이지',
+                            to: {
+                                path: '/test/lv0'
+                            },
+                            action: this.subAction
+                        }
+                    ]
                 },
                 {
                     icon: 'settings',
-                    title: '사이트 관리',
-                    to: {
-                        path: '/site'
-                    }
+                    title: '관리메뉴',
+                    subItems: [
+                        {
+                            icon: 'face',
+                            title: '사용자 관리',
+                            to: {
+                                path: '/manage/users'
+                            },
+                            action: this.subAction
+                        },
+                        {
+                            icon: 'pageview',
+                            title: '페이지 관리',
+                            to: {
+                                path: '/manage/pages'
+                            },
+                            action: this.subAction
+                        },
+                        {
+                            icon: 'settings',
+                            title: '사이트 관리',
+                            to: {
+                                path: '/manage/sites'
+                            },
+                            action: this.subAction
+                        },
+                        {
+                            icon: 'settings',
+                            title: '게시판 관리',
+                            to: {
+                                path: '/manage/boards'
+                            },
+                            action: this.subAction
+                        }
+                    ]
                 }
                 // {
                 //     icon: 'face',
@@ -183,7 +267,7 @@ export default {
             // localStorage.removeItem('token')
 
             this.$store.commit('delToken')
-            this.$router.push('/lv3')
+            this.$router.push('/test/lv3')
         },
         getSite () { // 초기에 사이트 정보를 가져온다.
             // routes.js 에서 axios 공통 설정해놨다
@@ -195,6 +279,10 @@ export default {
                     this.siteDark = r.data.d.dark
                 })
                 .catch(e => console.error(e.message))
+        },
+        subAction (i, n) {
+            console.log(`test-${i}-${n}`)
+            console.log(this.items[i].subItems[n].title)
         }
     }
 }

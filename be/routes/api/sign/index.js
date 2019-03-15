@@ -16,7 +16,7 @@ const signToken = (id, lv, name, rmb) => {
         const o = {
             issuer: cfg.jwt.issuer,
             subject: cfg.jwt.subject,
-            expiresIn: cfg.jwt.expiresIn,
+            expiresIn: cfg.jwt.expiresIn, // 3분
             algorithm: cfg.jwt.algorithm
         }
         if (rmb) o.expiresIn = cfg.jwt.expiresInRemember // 6일 보관

@@ -1,6 +1,9 @@
+const showTime = t => console.log(t)
+const echo = showTime
+
 // jwt
-const jwt = require('jsonwebtoken')
-const key = 'veryveryhardkey'
+// const jwt = require('jsonwebtoken')
+// const key = 'veryveryhardkey'
 
 /*
 const signToken = (id, lv, name) => {
@@ -181,10 +184,9 @@ const res3 = tt2()
 ///////////////////////////////////////////////////////////////////////
 // moment.js test
 
-const moment = require('moment')
-moment.locale('ko') // 한글화
-const showTime = t => console.log(t)
-const echo = showTime
+// const moment = require('moment')
+// moment.locale('ko') // 한글화
+
 
 // console.log(moment())
 // console.log(moment().toDate())
@@ -252,9 +254,9 @@ const echo = showTime
 // echo(moment.weekdaysMin()) // [ '일', '월', '화', '수', '목', '금', '토' ]
 
 // 오늘의 요일 얻기
-echo(moment().day()) // [0 ~ 6]
-echo(moment.weekdays(moment().day())) // 오늘의 요일명 얻기
-
+// echo(moment().day()) // [0 ~ 6]
+// echo(moment.weekdays(moment().day())) // 오늘의 요일명 얻기
+// echo(moment().format('YYYY-MM-DD HH:mm:ss'))
 // 해당 월의 일수 구하기
 // echo(moment("2020-02", "YYYY-MM").daysInMonth()) // 29
 // echo(moment("2019-01", "YYYY-MM").daysInMonth()) // 31
@@ -265,3 +267,64 @@ echo(moment.weekdays(moment().day())) // 오늘의 요일명 얻기
 // toObject() 로 객체로 리턴받기 { years, months, date, hours, minutes, secondes,... }
 // echo(moment().toObject())
 // echo(moment().toObject().date) // 14
+
+///////////////////////////////////////////////////////////////////////////////////////
+// mongoose population test
+
+// connect mongoose
+const mongoose = require('mongoose')
+// config 파일을 읽어온다.
+const cfg = require('../config')
+mongoose.connect(cfg.dbUrl, { useNewUrlParser: true }, err => {
+    if (err) return console.error(err)
+    console.log('mongoose connected!')
+})
+// connect mongoose -- end
+
+const User = require('./models/users')
+const Board = require('./models/boards')
+const Article = require('./models/articles')
+
+// User.findOne()
+//     .then(r => console.log(r.id, r._id)) // rhduddnr 5c85e9af9755c10a5649aabe
+
+// Board.findOne()
+//     .then(r => console.log(r.name, r._id)) // test 5c8a2af075f51020f39c3eff
+
+// Article.create({ title: 'aaa', content: 'kkfjf', _user: '5c85e9af9755c10a5649aabe', _board: '5c8a2af075f51020f39c3eff' })
+//     .then(r => console.log(r))
+/*
+{ cnt: { view: 0, like: 0 },
+  title: 'aaa',
+  content: 'kkfjf',
+  ip: '',
+  comments: [],
+  _id: 5c8a303a6f26242338083766,
+  _user: 5c85e9af9755c10a5649aabe,
+  _board: 5c8a2af075f51020f39c3eff,
+  __v: 0 }
+*/
+
+// Article.findOne()
+//     .populate('_user', '-pwd') // pwd 만 빼고
+//     .then(console.log)
+
+Article.find({ _board: '5c8a2af075f51020f39c3eff' })
+    .populate('_user', 'name')
+    .populate('_board')
+    .then(r => console.log(r.length))
+
+///////////////////////////////////////////////////////////////////////////////////////
+// js string - '[ERR01-TOKEN] jwt expired' 문자열 검사
+
+// const str = '[ERR01-TOKEN] jwt expired'
+// if (str.indexOf('ERR01-TOKEN') !== -1 || str.indexOf('jwt expired') !== -1) {
+//     console.log('찾았다')
+// }
+// echo(str.indexOf('ERR01-TOKEN'))
+// echo(str.indexOf('jwt expired'))
+// echo(str.indexOf('test'))
+
+// echo(str.includes('jwt'))
+
+///////////////////////////////////////////////////////////////////////////////////////

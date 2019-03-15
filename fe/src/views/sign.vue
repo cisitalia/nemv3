@@ -20,7 +20,7 @@
                                 prepend-icon="lock"
                                 label="Password"
                                 type="password"
-                                @keydown="inputPwd"
+                                @keydown.enter="signIn"
                             ></v-text-field>
                         <v-checkbox
                             v-model="form.remember"
@@ -89,11 +89,8 @@ export default {
 
                     // this.$router.push('/')
                     // 유저레벨에 맞는 페이지로 이동 하도록 변경
-                    if (r.data.ui.lv > 0) {
-                        this.$router.push(`/lv${r.data.ui.lv}`)
-                    } else {
-                        this.$router.push('/')
-                    }
+                    // console.log(r.data.ui.lv)
+                    this.$router.push(`/test/lv${r.data.ui.lv}`)
 
                     // this.$router.push('/header')
                     // location.href = '/header' // $router.push() 대신 이렇게 해도 된다
@@ -101,11 +98,11 @@ export default {
                 // .catch(e => console.error(e.message))
                 .catch(e => this.pop(e.message, 'error'))
         },
-        inputPwd (e) {
-            if (e.keyCode === 13) {
-                this.signIn()
-            }
-        },
+        // inputPwd (e) {
+        //     if (e.keyCode === 13) {
+        //         this.signIn()
+        //     }
+        // },
         pop (m, cl) {
             this.sb.act = true
             this.sb.msg = m
