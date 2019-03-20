@@ -11,7 +11,7 @@ const User = require('../../../models/users')
 // 로그인 토큰 생성 함수
 // [2019.3.5] id, lv, name 으로 변경
 // [2019.3.14] rmb(remember) 추가. 토큰갱신 기능 붙임
-const signToken = (id, lv, name, rmb) => {
+const signToken = (_id, id, lv, name, rmb) => {
     return new Promise((resolve, reject) => {
         const o = {
             issuer: cfg.jwt.issuer,
@@ -20,7 +20,7 @@ const signToken = (id, lv, name, rmb) => {
             algorithm: cfg.jwt.algorithm
         }
         if (rmb) o.expiresIn = cfg.jwt.expiresInRemember // 6일 보관
-        jwt.sign({ id, lv, name, rmb }, cfg.jwt.secretKey, o, (err, token) => {
+        jwt.sign({ _id, id, lv, name }, cfg.jwt.secretKey, o, (err, token) => {
             if (err) reject(err)
             resolve(token)
         })
@@ -41,8 +41,10 @@ router.post('/in', (req, res) => {
             const p = await (crypto.scryptSync(pwd, r._id.toString(), 64, { N: 1024 }).toString('hex')) // 비번풀기
             if (r.pwd !== p) throw new Error('비밀번호가 틀립니다')
 
-            const ui = { id: r.id, name: r.name, lv: r.lv, age: r.age }
-            const token = await signToken(r.id, r.lv, r.name, remember)
+            const ui = { id: r.id, name: r.name, lv: r.lv, age: r.age } // 커스텀으로 추가한 유저정보
+
+            // 리턴할 토큰
+            const token = await signToken(r._id, r.id, r.lv, r.name, remember)
 
             res.send({ success: true, token: token, ui: ui })
         })

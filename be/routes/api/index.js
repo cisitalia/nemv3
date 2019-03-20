@@ -43,17 +43,21 @@ const verifyToken = (t) => {
     })
 }
 
-// be/routes/api/sign/index.js 에 있는 signToken() 임
-const signToken = (id, lv, name, rmb) => {
+// 토큰 재발급 함수
+// be/routes/api/sign/index.js 에 있는 signToken() 는 로그인시 토큰을 발급하는 함수인데 반해,
+// 아래 토큰 재발급 함수는 만료시간을 체크(토큰 기한 = 만료시간 - 발급시간)해서 재발급해 준다.
+// 가장 큰 이유는 remember 를 통해 저장된 기한을 알 수 없기 때문이다.
+const signToken = (_id, id, lv, name, exp) => {
     return new Promise((resolve, reject) => {
         const o = {
             issuer: cfg.jwt.issuer,
             subject: cfg.jwt.subject,
             expiresIn: cfg.jwt.expiresIn, // 3분
-            algorithm: cfg.jwt.algorithm
+            algorithm: cfg.jwt.algorithm,
+            expiresIn: exp
         }
-        if (rmb) o.expiresIn = cfg.jwt.expiresInRemember // 6일 보관
-        jwt.sign({ id, lv, name, rmb }, cfg.jwt.secretKey, o, (err, token) => {
+        // > 이게 필요없다. if (rmb) o.expiresIn = cfg.jwt.expiresInRemember // 6일 보관
+        jwt.sign({ _id, id, lv, name }, cfg.jwt.secretKey, o, (err, token) => {
             if (err) reject(err)
             resolve(token)
         })
@@ -63,17 +67,16 @@ const signToken = (id, lv, name, rmb) => {
 // 토큰 재발급 함수 - 토큰만료시간 체크, verifyToken(t) 도 같이 행한다.
 const getToken = async (t) => {
     let vt = await verifyToken(t) // 토큰을 풀자
-
     if(vt.lv > 2) return { user: vt, token: null } // 손님계정은 그냥 나감
-
     const diff = moment(vt.exp * 1000).diff(moment(), 'seconds')
+    // return vt
     if (process.env.NODE_ENV === 'development') console.log(diff)
 
-    // 60초 보다 크면 그냥 나감
-    if (diff > (vt.exp - vt.iat) / cfg.jwt.expiresInDiv) return { user: vt, token: null }
+    const expSec = (vt.exp - vt.iat) // 토큰기한(초) = 만료시간 - 발급시간
+    if (diff > expSec / cfg.jwt.expiresInDiv) return { user: vt, token: null }
 
-    // 60초보다 작으면 토큰 재발행
-    const nt = await signToken(vt.id, vt.lv, vt.name, vt.rmb)
+    // 60초보다 작으면 토큰 재발행(토큰기한으로 발행)
+    const nt = await signToken(vt._id, vt.id, vt.lv, vt.name, expSec)
     vt = await verifyToken(nt)
     return { user: vt, token: nt }
 }
@@ -133,6 +136,11 @@ router.all('*', (req, res, next) => {
 
 // [방화벽 미들웨어] 페이지 생성(관리자) 및 페이지 진입(레벨에 따라)을 막는 api
 router.use('/page', require('./page'))
+
+// 게시판으로 보내는 미들웨어
+router.use('/board', require('./board'))
+// 게시물로 보내는 미들웨어
+router.use('/article', require('./article'))
 
 // 관리용 api : 관리자만 접근가능 가능
 // 위에서 생성한 req.user 를 이용해 req.user.lv 로 관리자 인증시도

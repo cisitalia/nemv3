@@ -89,12 +89,17 @@ export default new Router({
     base: process.env.BASE_URL,
     routes: [
         {
+            path: '/',
+            name: 'boardAnyone',
+            component: () => import('./views/board/anyone'),
+            beforeEnter: pageCheck
+        },
+        {
             path: '/test/lv3',
             name: 'testLv3',
             component: () => import('./views/test/lv3'),
             beforeEnter: pageCheck
         },
-
         {
             path: '/test/lv2',
             name: 'testLv2',

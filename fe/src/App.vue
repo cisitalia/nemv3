@@ -8,7 +8,21 @@
         fixed
         app
         >
-            <v-toolbar flat class="transparent">
+            <!-- 로그인 & 관리자 -->
+            <v-toolbar flat class="transparent" v-if="$store.state.token && this.$store.state.userInfo.id !== 'rhduddnr'">
+                <v-list class="pa-0">
+                    <v-list-tile avatar>
+                        <v-list-tile-avatar>
+                            <img src="https://randomuser.me/api/portraits/men/85.jpg">
+                        </v-list-tile-avatar>
+                        <v-list-tile-content>
+                            <v-list-tile-title>{{ this.$store.state.userInfo.name }}</v-list-tile-title>
+                        </v-list-tile-content>
+                    </v-list-tile>
+                </v-list>
+            </v-toolbar>
+            <!-- 로그인 & !관리자 -->
+            <v-toolbar flat class="transparent" v-else-if="$store.state.token && this.$store.state.userInfo.id === 'rhduddnr'">
                 <v-list class="pa-0">
                     <v-list-tile avatar>
                         <v-list-tile-avatar>
@@ -30,13 +44,31 @@
                             </v-badge>
                         </v-list-tile-avatar>
                         <v-list-tile-content>
-                            <v-list-tile-title>관리자</v-list-tile-title>
+                            <v-list-tile-title>{{ this.$store.state.userInfo.name }}</v-list-tile-title>
                         </v-list-tile-content>
                         <v-list-tile-action>
                             <v-btn icon @click.native.stop="mini = !mini">
                                 <v-icon>chevron_left</v-icon>
                             </v-btn>
                         </v-list-tile-action>
+                    </v-list-tile>
+                </v-list>
+            </v-toolbar>
+            <!-- !로그인 & 손님 -->
+            <v-toolbar flat class="transparent" v-else>
+                <v-list class="pa-0">
+                    <v-list-tile avatar>
+                        <v-list-tile-avatar>
+                            <v-icon
+                                large
+                                color="grey darken-1"
+                            >
+                                sentiment_satisfied_alt
+                            </v-icon>
+                        </v-list-tile-avatar>
+                        <v-list-tile-content>
+                            <v-list-tile-title>손님</v-list-tile-title>
+                        </v-list-tile-content>
                     </v-list-tile>
                 </v-list>
             </v-toolbar>
@@ -86,9 +118,9 @@
                 <v-icon>loop</v-icon>
             </v-btn> -->
             <v-toolbar-title v-text="siteTitle"></v-toolbar-title>
-            <v-toolbar-title v-if="this.$store.state.userInfo.name">
+            <!-- <v-toolbar-title v-if="this.$store.state.userInfo.name">
                 {{ this.$store.state.userInfo.name }}
-            </v-toolbar-title>
+            </v-toolbar-title> -->
             <v-toolbar-title>
                 [{{ this.$moment().format('YYYY.MM.DD') }} {{ this.$moment.weekdays(this.$moment().day()) }} 입니다.]
             </v-toolbar-title>
@@ -142,9 +174,23 @@ export default {
             siteDark: false,
             items: [
                 {
+                    icon: 'chat',
+                    title: '끄적끄적',
+                    act: true, // 로딩시 열어줌
+                    subItems: [
+                        {
+                            icon: 'home',
+                            title: '아무나',
+                            to: {
+                                path: '/'
+                            },
+                            action: this.subAction
+                        }
+                    ]
+                },
+                {
                     icon: 'pan_tool',
                     title: '레벨테스트',
-                    act: true,
                     subItems: [
                         {
                             icon: 'home',
