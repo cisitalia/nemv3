@@ -68,10 +68,14 @@ const signToken = (_id, id, lv, name, exp) => {
 const getToken = async (t) => {
     let vt = await verifyToken(t) // 토큰을 풀자
     if(vt.lv > 2) return { user: vt, token: null } // 손님계정은 그냥 나감
-    const diff = moment(vt.exp * 1000).diff(moment(), 'seconds')
-    // return vt
-    if (process.env.NODE_ENV === 'development') console.log(diff)
 
+    // 남은시간(초) = 토큰 만료시간(초)과 현재시간(초)의 차
+    const diff = moment(vt.exp * 1000).diff(moment(), 'seconds')
+    if (process.env.NODE_ENV === 'development') console.log(diff) // 개발모드면 남은시간(초)를 보여줌
+
+    // 남은시간이 재발급 유효시간보다 크면 재발행 하지 않고 넘어감.
+    // cfg.jwt.expiresInDiv 이 숫자가 클 수록 재발급 시간이 촉박해짐 - 남은시간이 얼마 없을때 재발급된다는 의미
+    // cfg.jwt.expiresInDiv이 6이면 5분 남았을 때 재발급, 30이면 1분 남았을 때 재발급된다.
     const expSec = (vt.exp - vt.iat) // 토큰기한(초) = 만료시간 - 발급시간
     if (diff > expSec / cfg.jwt.expiresInDiv) return { user: vt, token: null }
 

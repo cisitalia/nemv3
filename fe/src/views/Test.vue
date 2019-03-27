@@ -85,6 +85,25 @@
                     </v-card>
                 </v-flex>
             </v-layout>
+
+            <v-btn
+                color="pink"
+                dark
+                small
+                absolute
+                bottom
+                right
+                fab
+                @click="anyAction"
+            >
+                <v-icon>add</v-icon>
+            </v-btn>
+
+            <div>{{ a }}</div>
+            <div>{{ b }}</div>
+            <div>{{ aPlusBm() }}</div>
+            <div>{{ aPlusBc }}</div>
+
         </v-container>
     </div>
 </template>
@@ -102,7 +121,34 @@ export default {
             { text: 'Medium (8px)', value: 'md' },
             { text: 'Large (16px)', value: 'lg' },
             { text: 'Extra large (24px)', value: 'xl' }
-        ]
-    })
+        ],
+        a: 1,
+        b: 2
+    }),
+    watch: {
+        a () {
+            console.log('change')
+        }
+    },
+    methods: {
+        aPlusBm () {
+            return this.a + this.b
+        },
+        anyAction () {
+            this.a = 5
+            // console.log(this.aPlusBm())
+            console.log(this.aPlusBc)
+        }
+    },
+    computed: {
+        aPlusBc () {
+            return this.a + this.b
+        }
+    },
+    mounted () {
+        console.log(this.a + this.b)
+        console.log(this.aPlusBm())
+        console.log(this.aPlusBc)
+    }
 }
 </script>
