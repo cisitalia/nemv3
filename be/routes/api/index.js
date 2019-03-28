@@ -30,6 +30,9 @@ router.use('/register', require('./register')) // register 폴더
 // 때문에 권한과 상관없으니 여기 위치
 router.use('/site', require('./site')) // site 폴더
 
+// 게시판으로 보내는 미들웨어 - 토큰검사 위로 이동
+router.use('/board', require('./board'))
+
 // 주어진 토큰을 키로 풀어내는 함수
 const verifyToken = (t) => {
     return new Promise((resolve, reject) => {
@@ -141,8 +144,6 @@ router.all('*', (req, res, next) => {
 // [방화벽 미들웨어] 페이지 생성(관리자) 및 페이지 진입(레벨에 따라)을 막는 api
 router.use('/page', require('./page'))
 
-// 게시판으로 보내는 미들웨어
-router.use('/board', require('./board'))
 // 게시물로 보내는 미들웨어
 router.use('/article', require('./article'))
 

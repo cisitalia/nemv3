@@ -4,7 +4,8 @@ var router = express.Router()
 
 const Board = require('../../../models/boards')
 
-router.get('/:name', function (req, res, next) {
+// 게시판 목록 중 특정 게시판의 이름으로 해당 게시판이 있는지 확인한다.
+router.get('/read/:name', function (req, res, next) {
     const name = req.params.name
     Board.findOne({ name })
         .then((r) => {
@@ -15,10 +16,21 @@ router.get('/:name', function (req, res, next) {
         .catch((e) => {
             res.send({ success: false, msg: e.message })
         })
-});
+})
+
+// 게시판 리스트를 얻어온다.
+router.get('/list', (req, res, next) => {
+    Board.find().sort({ lv: -1 })
+        .then(rs => {
+            res.send({ success: true, ds: rs, token: req.token })
+        })
+        .catch(e => {
+            res.send({ success: false, msg: e.message })
+        })
+})
 
 router.all('*', function (req, res, next) {
     next(createError(404, '그런 api 없어'));
-});
+})
 
 module.exports = router;

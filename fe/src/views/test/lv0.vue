@@ -99,13 +99,14 @@ export default {
                     align: 'left',
                     sortable: false,
                     value: 'name',
-                    class: 'blue-grey lighten-4'
+                    class: 'blue-grey lighten-4',
+                    width: '25%'
                 },
-                { text: 'Calories', value: 'calories', class: 'blue-grey lighten-4' },
-                { text: 'Fat (g)', value: 'fat', class: 'blue-grey lighten-4' },
-                { text: 'Carbs (g)', value: 'carbs', class: 'blue-grey lighten-4' },
-                { text: 'Protein (g)', value: 'protein', class: 'blue-grey lighten-4' },
-                { text: 'Iron (%)', value: 'iron', class: 'blue-grey lighten-4' }
+                { text: 'Calories', value: 'calories', class: 'blue-grey lighten-4', width: '15%' },
+                { text: 'Fat (g)', value: 'fat', class: 'blue-grey lighten-4', width: '15%' },
+                { text: 'Carbs (g)', value: 'carbs', class: 'blue-grey lighten-4', width: '15%' },
+                { text: 'Protein (g)', value: 'protein', class: 'blue-grey lighten-4', width: '15%' },
+                { text: 'Iron (%)', value: 'iron', class: 'blue-grey lighten-4', width: '15%' }
             ],
             desserts: [
                 { name: 'Frozen Yogurt', calories: 159, fat: 6.0, carbs: 24, protein: 4.0, iron: '1%' },

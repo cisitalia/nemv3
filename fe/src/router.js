@@ -90,8 +90,14 @@ export default new Router({
     routes: [
         {
             path: '/',
-            name: 'boardAnyone',
-            component: () => import('./views/board/anyone'),
+            name: 'dashboard',
+            component: () => import('./views/dashboard'),
+            beforeEnter: pageCheck
+        },
+        {
+            path: '/board/:name',
+            name: 'board',
+            component: () => import('./views/board'),
             beforeEnter: pageCheck
         },
         {
@@ -160,15 +166,25 @@ export default new Router({
             component: useComponent('register')
         },
         {
-            path: '/test',
-            name: 'test',
-            component: useComponent('Test')
+            path: '/test/:name?',
+            name: 'router_test',
+            component: useComponent('Test3')
         },
         {
             path: '*',
             name: 'e404',
             component: useComponent('e404')
         }
+        // {
+        //     path: '/test',
+        //     name: 'test',
+        //     component: useComponent('Test')
+        // },
+        // {
+        //     path: '/test2',
+        //     name: 'test2',
+        //     component: useComponent('Test2')
+        // },
         // {
         //     path: '/header',
         //     name: '헤더',

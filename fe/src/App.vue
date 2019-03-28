@@ -174,18 +174,40 @@ export default {
             siteDark: false,
             items: [
                 {
-                    icon: 'chat',
-                    title: '끄적끄적',
+                    icon: 'donut_large',
+                    title: '현황',
                     act: true, // 로딩시 열어줌
                     subItems: [
                         {
-                            icon: 'home',
-                            title: '아무나',
+                            // icon: 'home',
+                            title: '오늘',
                             to: {
                                 path: '/'
                             },
                             action: this.subAction
                         }
+                    ]
+                },
+                {
+                    icon: 'chat',
+                    title: '게시판',
+                    subItems: [
+                        // {
+                        //     icon: 'home',
+                        //     title: '아무나',
+                        //     to: {
+                        //         path: '/board/아무나'
+                        //     },
+                        //     action: this.subAction
+                        // },
+                        // {
+                        //     icon: 'home',
+                        //     title: '지호',
+                        //     to: {
+                        //         path: '/board/지호'
+                        //     },
+                        //     action: this.subAction
+                        // }
                     ]
                 },
                 {
@@ -297,6 +319,7 @@ export default {
     mounted () { // 로딩시 axios 를 통하기 때문에 번쩍거리는 단점이 있다.
         this.getSite()
         this.drawer = true
+        this.getBoards()
     },
     methods: {
         signIn () {
@@ -323,6 +346,20 @@ export default {
                     this.siteTitle = r.data.d.title
                     this.siteCopyright = r.data.d.copyright
                     this.siteDark = r.data.d.dark
+                })
+                .catch(e => console.error(e.message))
+        },
+        getBoards () { // 로딩시 게시판 리스트를 가져와서 메뉴를 구성한다.
+            this.$axios.get('/board/list')
+                .then(({ data }) => {
+                    data.ds.forEach(v => {
+                        this.items[1].subItems.push({
+                            title: v.name,
+                            to: {
+                                path: `/board/${v.name}`
+                            }
+                        })
+                    })
                 })
                 .catch(e => console.error(e.message))
         },

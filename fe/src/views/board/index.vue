@@ -239,6 +239,11 @@ export default {
                 this.delay()
                 // this.list()
             }
+        },
+        // 라우트 감시 - 게시판을 변경하는 라우트를 감시한다
+        '$route' (to, from) {
+            // console.log(to.path, from.path)
+            this.getBoard()
         }
     },
     computed: {
@@ -282,7 +287,8 @@ export default {
             }
         },
         getBoard () {
-            this.$axios.get('board/아무나')
+            // console.log(this.$route.params)
+            this.$axios.get(`board/read/${this.$route.params.name}`)
                 .then(({ data }) => {
                     if (!data.success) throw new Error(data.msg)
                     this.board = data.d
@@ -325,7 +331,7 @@ export default {
                     this.pagination.totalItems = data.t
                     this.articles = data.ds
                     this.loading = false
-                    console.log(this.pagination)
+                    // console.log(this.pagination)
                 })
                 .catch(e => {
                     this.pop(e.message, 'error')
