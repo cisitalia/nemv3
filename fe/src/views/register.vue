@@ -60,20 +60,6 @@
             </v-flex>
         </v-layout>
 
-        <v-snackbar
-            v-model="sb.act"
-            top
-        >
-            {{ sb.msg }}
-            <v-btn
-                :color="sb.color"
-                flat
-                @click="sb.act = false"
-            >
-                닫기
-            </v-btn>
-        </v-snackbar>
-
     </v-container>
 </template>
 
@@ -87,12 +73,9 @@ export default {
     },
     data: () => ({
         form: {
-            id: '', name: '', pwd: ''
-        },
-        sb: {
-            act: false,
-            msg: '',
-            color: 'warning'
+            id: '',
+            name: '',
+            pwd: ''
         },
         agree: null,
         dictionary: {
@@ -140,7 +123,7 @@ export default {
                         await this.clear() // form clear
                         throw new Error(`서버가 거부했습니다. ${r.data.msg}`)
                     }
-                    this.pop('가입 완료 되었습니다', 'success')
+                    this.$store.commit('pop', { msg: '가입 완료 되었습니다', color: 'success' })
                     this.$router.push('/sign')
                 })
                 // .then(r => {
@@ -156,7 +139,9 @@ export default {
 
                 //     this.$router.push('/sign')
                 // })
-                .catch(e => this.pop(e.message, 'warning'))
+                .catch(e => {
+                    if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
+                })
         },
         clear () {
             this.form.id = ''
@@ -164,11 +149,6 @@ export default {
             this.form.name = ''
             this.agree = null
             this.$validator.reset()
-        },
-        pop (m, cl) {
-            this.sb.act = true
-            this.sb.msg = m
-            this.sb.color = cl
         }
     }
 }

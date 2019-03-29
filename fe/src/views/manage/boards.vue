@@ -67,19 +67,7 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
-        <v-snackbar
-            v-model="sb.act"
-            top
-        >
-        {{ sb.msg }}
-        <v-btn
-            :color="sb.color"
-            flat
-            @click="sb.act = false"
-        >
-            닫기
-        </v-btn>
-        </v-snackbar>
+
     </v-container>
 </template>
 
@@ -120,13 +108,15 @@ export default {
             }
         },
         add () {
-            if (!this.form.name) return this.pop('이름을 작성해 주세요', 'warning')
+            if (!this.form.name) return this.$store.commit('pop', { msg: '이름을 작성해 주세요.', color: 'warning' })
             this.$axios.post('manage/board', this.form)
                 .then(r => {
                     this.dialog = false
                     this.list()
                 })
-                .catch(e => this.pop(e.message, 'error'))
+                .catch(e => {
+                    if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
+                })
         },
         list () {
             this.$axios.get('manage/board')
@@ -136,12 +126,9 @@ export default {
                     if (this.boards.length === 0) this.alert = true
                     else this.alert = false
                 })
-                .catch(e => this.pop(e.message, 'error'))
-        },
-        pop (m, c) {
-            this.sb.act = true
-            this.sb.msg = m
-            this.sb.color = c
+                .catch(e => {
+                    if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
+                })
         }
     }
 }

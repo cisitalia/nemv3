@@ -81,20 +81,6 @@
             </v-card>
         </v-dialog>
 
-        <v-snackbar
-            v-model="snackbar"
-            top
-        >
-            {{ sbMsg }}
-            <v-btn
-                color="pink"
-                flat
-                @click="snackbar = false"
-            >
-            Close
-            </v-btn>
-        </v-snackbar>
-
     </v-container>
 </template>
 
@@ -109,8 +95,6 @@ export default {
             pageLvs: [],
             pageLv: 0,
             pageName: '',
-            snackbar: false,
-            sbMsg: '',
             putId: ''
         }
     },
@@ -125,9 +109,7 @@ export default {
                     this.pages = r.data.pages
                 })
                 .catch(e => {
-                    // eslint-disable-next-line
-                    // console.error(e.message)
-                    this.pop(e.message)
+                    if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
                 })
         },
         putDialog (page) {
@@ -144,11 +126,11 @@ export default {
                 name: this.pageName, lv: this.pageLv
             })
                 .then(r => {
-                    this.pop('페이지 수정 완료')
+                    this.$store.commit('pop', { msg: '페이지 수정 완료', color: 'success' })
                     this.getPages()
                 })
                 .catch(e => {
-                    this.pop(e.message)
+                    if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
                 })
         },
         delPage () {
@@ -156,11 +138,11 @@ export default {
             this.putId = '' // 비운다
             this.$axios.delete(`${this.$apiRootPath}manage/page/${dId}`)
                 .then(r => {
-                    this.pop('페이지 삭제 완료')
+                    this.$store.commit('pop', { msg: '페이지 삭제 완료', color: 'success' })
                     this.getPages()
                 })
                 .catch(e => {
-                    this.pop(e.message)
+                    if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
                 })
         },
         confirmDelete (id) {
@@ -172,10 +154,6 @@ export default {
             if (yesno) {
                 this.delPage()
             }
-        },
-        pop (msg) {
-            this.snackbar = true
-            this.sbMsg = msg
         }
     }
 }

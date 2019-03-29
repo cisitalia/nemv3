@@ -88,20 +88,6 @@
             </v-card>
         </v-dialog>
 
-        <v-snackbar
-            v-model="snackbar"
-            top
-        >
-            {{ sbMsg }}
-            <v-btn
-                color="pink"
-                flat
-                @click="snackbar = false"
-            >
-            Close
-            </v-btn>
-        </v-snackbar>
-
     </v-container>
 </template>
 
@@ -116,8 +102,6 @@ export default {
             siteTitle: '',
             siteCopyright: '',
             siteDark: false,
-            snackbar: false,
-            sbMsg: '',
             putId: ''
         }
     },
@@ -132,9 +116,7 @@ export default {
                     this.sites = r.data.sites
                 })
                 .catch(e => {
-                    // eslint-disable-next-line
-                    // console.error(e.message)
-                    this.pop(e.message)
+                    if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
                 })
         },
         putDialog (site) {
@@ -153,25 +135,27 @@ export default {
                 title: this.siteTitle, copyright: this.siteCopyright, dark: this.siteDark
             })
                 .then(r => {
-                    this.pop('사이트 수정 완료')
+                    this.$store.commit('pop', { msg: '사이트 수정 완료', color: 'success' })
                     this.getSites()
                 })
                 .catch(e => {
-                    this.pop(e.message)
+                    if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
                 })
         },
         delSite () {
-            const dId = this.putId
-            this.putId = '' // 비운다
-            // this.$axios.delete(`${this.$apiRootPath}manage/site/${dId}`)
-            this.$axios.delete(`manage/site/${dId}`)
-                .then(r => {
-                    this.pop('사이트 삭제 완료')
-                    this.getSites()
-                })
-                .catch(e => {
-                    this.pop(e.message)
-                })
+            this.$store.commit('pop', { msg: '사이트 삭제하면 안되요!', color: 'error' })
+
+            // 사이트 설정은 삭제 불가
+            // const dId = this.putId
+            // this.putId = '' // 비운다
+            // this.$axios.delete(`manage/site/${dId}`)
+            //     .then(r => {
+            //         this.pop('사이트 삭제 완료')
+            //         this.getSites()
+            //     })
+            //     .catch(e => {
+            //         if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
+            //     })
         },
         confirmDelete (id) {
             this.confirmDialog = true
@@ -182,10 +166,6 @@ export default {
             if (yesno) {
                 this.delSite()
             }
-        },
-        pop (msg) {
-            this.snackbar = true
-            this.sbMsg = msg
         }
     }
 }

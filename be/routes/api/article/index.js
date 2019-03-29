@@ -1,6 +1,5 @@
-var express = require('express')
-var createError = require('http-errors')
-var router = express.Router()
+const router = express.Router()
+const createError = require('http-errors')
 
 const Board = require('../../../models/boards')
 const Article = require('../../../models/articles')

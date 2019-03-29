@@ -9,20 +9,6 @@
         <user-dialog ref="userDialog"></user-dialog>
         <confirm ref="confirm"></confirm>
 
-        <v-snackbar
-            v-model="sb.act"
-            top
-        >
-            {{ sb.msg }}
-            <v-btn
-                color="pink"
-                flat
-                @click="sb.act = false"
-            >
-            Close
-            </v-btn>
-        </v-snackbar>
-
     </v-container>
 </template>
 
@@ -38,15 +24,10 @@ export default {
     components: { userList, userDialog, confirm },
     data: () => ({
         users: [],
-        putId: '',
-        sb: {
-            act: false,
-            msg: 'xxx'
-        }
+        putId: ''
     }),
     mounted () {
         this.getUsers()
-        // console.log(this.$moment().format('YYYY.MM.DD')) // 현재 날짜-시간
     },
     methods: {
         getUsers () {
@@ -55,23 +36,20 @@ export default {
                     this.users = r.data.users
                 })
                 .catch(e => {
-                    // eslint-disable-next-line
-                    // console.error(e.message)
-                    this.pop(e.message)
+                    if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
                 })
         },
         putDialog (user) {
             // userDialog open
-            this.$refs.userDialog.open(user, '유저정보 수정', { color: 'purple' })
+            this.$refs.userDialog.open(user, '사용자 정보 수정', { color: 'purple' })
                 .then(r => {
-                    // console.log(r)
                     if (r === 'edit success') { // 유저수정 성공
-                        this.pop('유저 수정 완료')
+                        this.$store.commit('pop', { msg: '사용자 수정 완료', color: 'success' })
                         this.getUsers()
                     }
                 })
                 .catch(e => {
-                    this.pop(e.message)
+                    if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
                 })
         },
         confirmDelete (id) {
@@ -79,7 +57,6 @@ export default {
 
             this.$refs.confirm.open('정말 삭제하시겠습니까?', '삭제된 데이터는 복구할 수 없습니다.', { color: 'warning' })
                 .then((confirm) => {
-                    // console.log(confirm) // true or false
                     if (confirm) { // true 가 리턴되면 삭제한다.
                         this.delUser()
                     }
@@ -90,16 +67,12 @@ export default {
             this.putId = '' // 비운다
             this.$axios.delete(`manage/user/${dId}`)
                 .then(r => {
-                    this.pop('유저 삭제 완료')
+                    this.$store.commit('pop', { msg: '사용자 삭제 완료', color: 'success' })
                     this.getUsers()
                 })
                 .catch(e => {
-                    this.pop(e.message)
+                    if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
                 })
-        },
-        pop (msg) {
-            this.sb.act = true
-            this.sb.msg = msg
         }
     }
 }
