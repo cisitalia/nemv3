@@ -21,12 +21,12 @@ export default {
     watch: {
         '$route' (to, from) {
             // console.log(to)
-
             // location.href = to.path // [정상] 리로딩
 
             // 필요한 부분만 업데이트
             this.$router.push(to.path)
-            this.username = this.$route.params.name || 'No username'
+            // this.username = this.$route.params.name || 'No username'
+            this.getLink()
         }
     },
     mounted () {
@@ -35,6 +35,11 @@ export default {
 
         this.username = this.$route.params.name || 'No username'
         // this.postId = this.$route.params.post_id || 'post id is not valid'
+    },
+    methods: {
+        getLink () {
+            this.username = this.$route.params.name || 'No username'
+        }
     }
 }
 </script>

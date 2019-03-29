@@ -31,6 +31,7 @@ router.use('/register', require('./register')) // register 폴더
 router.use('/site', require('./site')) // site 폴더
 
 // 게시판으로 보내는 미들웨어 - 토큰검사 위로 이동
+// 버그존재 - 레벨적용이 풀림. 최초 페이지 접근시에는 적용되나, 이후 게시판으로 이동시 풀림
 router.use('/board', require('./board'))
 
 // 주어진 토큰을 키로 풀어내는 함수
@@ -144,7 +145,7 @@ router.all('*', (req, res, next) => {
 // [방화벽 미들웨어] 페이지 생성(관리자) 및 페이지 진입(레벨에 따라)을 막는 api
 router.use('/page', require('./page'))
 
-// 게시물로 보내는 미들웨어
+// 게시물로 보내는 미들웨어 - 여기서 앞에서는 유저 권한 검사를 하는구나
 router.use('/article', require('./article'))
 
 // 관리용 api : 관리자만 접근가능 가능

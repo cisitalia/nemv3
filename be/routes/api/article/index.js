@@ -20,6 +20,10 @@ const Article = require('../../../models/articles')
 
 // 게시판에 엮인 게시물의 리스트를 가져오는 API
 router.get('/list/:_board', (req, res, next) => {
+    // 게시판 권한검사를 하려했으나 안되겠넹.. 무엇보다 게시물 보려고 할 때마다
+    // 게시판을 검색하는 것도 맘에 안듦
+    // if (r.lv < req.user.lv) return res.send({ success: false, msg: `${name} 게시판을 볼 수 있는 자격이 없습니다.` })
+
     const _board = req.params._board
     // 검색처리
     let { search, sort, order, skip, limit } = req.query
