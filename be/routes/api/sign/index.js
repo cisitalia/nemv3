@@ -1,9 +1,7 @@
-var express = require('express');
-var createError = require('http-errors')
-var router = express.Router()
+const createError = require('http-errors')
+const router = require('express').Router()
 
 const crypto = require('crypto')
-
 const jwt = require('jsonwebtoken')
 const cfg = require('../../../../config')
 const User = require('../../../models/users')
@@ -28,16 +26,17 @@ const signToken = (_id, id, lv, name, rmb) => {
 }
 
 // /sign/in 으로 들어오는 로그인시 아이디/비번/레벨 을 검사하고 토큰을 발행한다.
-router.post('/in', (req, res) => {
+router.post('/in', (req, res, next) => {
+    // fs.readFile('a') // 500 인터널 서버 에러를 테스트 하기 위한 코드
+
     const { id, pwd, remember } = req.body
-    if (!id) return res.send({ success: false, msg: '아이디가 없습니다'})
-    if (!pwd) return res.send({ success: false, msg: '비밀번호가 없습니다'})
-    if (remember === undefined) return res.send({ success: false, msg: '기억하기가 없습니다.' })
+    if (!id) throw createError(400, '아이디가 없습니다')
+    if (!pwd) throw createError(400, '비밀번호가 없습니다')
+    if (remember === undefined) throw createError(400, '기억하기가 없습니다.')
 
     // >> async ~ await 방식 : 훨씬 간결하다
     User.findOne({ id }).then(async r => {
             if (!r) throw new Error('존재하지 않는 아이디 입니다.')
-            // if (r.pwd !== pwd) throw new Error('비밀번호가 틀리네요')
             const p = await (crypto.scryptSync(pwd, r._id.toString(), 64, { N: 1024 }).toString('hex')) // 비번풀기
             if (r.pwd !== p) throw new Error('비밀번호가 틀립니다')
 
@@ -50,6 +49,7 @@ router.post('/in', (req, res) => {
         })
         .catch(e => {
             res.send({ success: false, msg: e.message })
+            // next(createError(401, e.massage))
         })
 
     /*
@@ -89,14 +89,5 @@ router.post('/in', (req, res) => {
         })
     */
 })
-
-router.post('/out', (req, res) => {
-    res.send({ success: false, msg: '아직 준비 안됨' })
-})
-
-// 지정된 경로가 아니면 에러를 app.js 의 에러처리 루틴으로 보내버린다.
-router.all('*', function (req, res, next) {
-    next(createError(404, '그런 api는 없다규 test'))
-});
 
 module.exports = router;

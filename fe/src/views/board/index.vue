@@ -268,7 +268,6 @@ export default {
             }
         },
         getBoard () {
-            // console.log(this.$route.params)
             this.$axios.get(`board/read/${this.$route.params.name}`)
                 .then(({ data }) => {
                     if (!data.success) throw new Error(data.msg)

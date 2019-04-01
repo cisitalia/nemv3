@@ -1,11 +1,13 @@
-var express = require('express')
-var createError = require('http-errors')
-var router = express.Router()
+const router = require('express').Router()
+const createError = require('http-errors')
 
 const Page = require('../../../models/pages')
 
 // post 로 들어오는 즉, 새로운 페이지를 생성하는 로직이다
 router.post('/', function (req, res, next) {
+    // return res.send({ success: true, d: req.user })
+    // throw createError(403, 'hhhh')
+
     const { name } = req.body
     Page.findOne({ name })
         .then((r) => {
@@ -31,13 +33,7 @@ router.post('/', function (req, res, next) {
             // 토큰을 해제한 유저 정보는 req.user 에 담겨있고 이것을 d 객체에 담아 페이지에 보낸다
             res.send({ success: true, d: req.user, token: req.token })
         })
-        .catch((e) => {
-            res.send({ success: false, msg: e.message })
-        })
-});
-
-router.all('*', function (req, res, next) {
-    next(createError(404, '그런 api 없어'));
-});
+        .catch(e => next(createError(403, e.message)))
+})
 
 module.exports = router;

@@ -272,18 +272,18 @@ const res3 = tt2()
 // mongoose population test
 
 // connect mongoose
-const mongoose = require('mongoose')
-// config 파일을 읽어온다.
-const cfg = require('../config')
-mongoose.connect(cfg.dbUrl, { useNewUrlParser: true }, err => {
-    if (err) return console.error(err)
-    console.log('mongoose connected!')
-})
-// connect mongoose -- end
+// const mongoose = require('mongoose')
+// // config 파일을 읽어온다.
+// const cfg = require('../config')
+// mongoose.connect(cfg.dbUrl, { useNewUrlParser: true }, err => {
+//     if (err) return console.error(err)
+//     console.log('mongoose connected!')
+// })
+// // connect mongoose -- end
 
-const User = require('./models/users')
-const Board = require('./models/boards')
-const Article = require('./models/articles')
+// const User = require('./models/users')
+// const Board = require('./models/boards')
+// const Article = require('./models/articles')
 
 // User.findOne()
 //     .then(r => console.log(r.id, r._id)) // rhduddnr 5c85e9af9755c10a5649aabe
@@ -309,10 +309,10 @@ const Article = require('./models/articles')
 //     .populate('_user', '-pwd') // pwd 만 빼고
 //     .then(console.log)
 
-Article.find({ _board: '5c8a2af075f51020f39c3eff' })
-    .populate('_user', 'name')
-    .populate('_board')
-    .then(r => console.log(r.length))
+// Article.find({ _board: '5c8a2af075f51020f39c3eff' })
+//     .populate('_user', 'name')
+//     .populate('_board')
+//     .then(r => console.log(r.length))
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // js string - '[ERR01-TOKEN] jwt expired' 문자열 검사
@@ -328,3 +328,23 @@ Article.find({ _board: '5c8a2af075f51020f39c3eff' })
 // echo(str.includes('jwt'))
 
 ///////////////////////////////////////////////////////////////////////////////////////
+// * 프라미스로 일으키는 실패(reject)는 에러가 아니다!
+// 이 점을 분명히 알고 있어야 겠다.
+// 프라미스의 reject 는 개발자가 의도한 에러이다.
+// 정확히는 에러로 처리할 수도 있고 => reject(new Error('error!!!'))
+// 그냥 resolve() 가 아닌 else 상황이기도 하다.
+// resolve(1), reject(1) 는 둘다 1을 리턴한다. 즉, 상황에 따라 던지는 값일 뿐이다.
+const et = (a) => {
+    return new Promise((resolve, reject) => {
+        if (a >= 20) {
+            // resolve(1)
+            resolve(true)
+        }
+        // reject(new Error('error!!!')) // 에러를 던지거나
+        // reject(1)
+        reject('error! - invalid value : ' + a) // 임의의 값을 던지거나
+    })
+}
+et(20).then(echo).catch(e => echo(e)) // true
+et(10).then(echo).catch(e => echo(e)) // error! - invalid value : 10
+et(10).then(echo).catch(echo) // 더 간단히 : error! - invalid value : 10

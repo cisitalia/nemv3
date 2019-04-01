@@ -1,8 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import axios from 'axios'
-// import Home from './views/Home.vue'
-
 // vuex store 를 쓰기 위해서
 import store from './store.js'
 
@@ -29,43 +27,53 @@ axios.interceptors.request.use(function (config) {
 })
 
 // Add a response interceptor
-axios.interceptors.response.use(function (response) {
-    // Do something with response data
-    // console.log(response)
-
-    // > 토큰을 재발급받으면 여기서 가로챈 후 로컬스토리지에 저장한다.
-    const token = response.data.token
-    // console.log(token)
-    if (token) localStorage.setItem('token', token)
-    return response
-}, function (error) {
-    // Do something with response error
-    return Promise.reject(error)
-})
+// * api에서 오는 응답(response)을 가로챈다.
+axios.interceptors.response.use(
+    function (response) {
+        // > 토큰을 재발급받으면 여기서 가로챈 후 로컬스토리지에 저장한다.
+        const token = response.data.token
+        if (token) localStorage.setItem('token', token)
+        return response
+    },
+    function (error) {
+        // * 서버에서 던져주는 HTTP 공용에러 처리 추가
+        // console.log(error) // 자세한 내용을 알기 힘들다
+        // console.log(error.response) // error.response.data.msg 에 에러메시지가 담겨온다, error.response.status에 상태가 있다
+        switch (error.response.status) {
+        case 400:
+            store.commit('pop', { msg: `잘못된 요청입니다(${error.response.status}:${error.message})`, color: 'error' })
+            break
+        case 401:
+            store.commit('delToken')
+            store.commit('pop', { msg: `인증 오류입니다(${error.response.status}:${error.message})`, color: 'error' })
+            break
+        case 403:
+            store.commit('pop', { msg: `이용 권한이 없습니다(${error.response.status}:${error.message})`, color: 'warning' })
+            break
+        default:
+            store.commit('pop', { msg: `알수 없는 오류입니다(${error.response.status}:${error.message})`, color: 'error' })
+            break
+        }
+        return Promise.reject(error)
+    }
+)
 // ** axios 인터셉터 끝
 
-// [미들웨어 - 방화벽이자 인터셉터]
+// [프론트 미들웨어 - 방화벽이자 인터셉터]
 // 페이지체크가 필요한 페이지는 접근이 레벨에 따라 제한되어있다. 당연히 로그인 필요
 // 해당 페이지에 접근하기 위해서는 be/routes/api/page 에 post 접근을 통해 승인받아야 한다.
-// 성공하면 갈길 계속 가고, 실패가 리턴되면 /block/${msg} 로 빠진다
+// 성공하면 갈길 계속 가고, {폐지::실패가 리턴되면 /block/${msg} 로 빠진다}
 // headers: Authorization : token 을 적용했으므로 이제 토큰유무(로그인유무)를 따지는데도 쓰이게 된다.
 const pageCheck = (to, from, next) => {
-    // return next()
-    // axios.post('page', { name: to.path.replace('/', '') }, { headers: { Authorization: localStorage.getItem('token') } })
     axios.post('page', { name: to.path })
         .then((r) => {
-            // console.log(r.data)
             if (!r.data.success) throw new Error(r.data.msg)
-
-            // 라우터로 넘어오는 r.data.d(유저정보)를 사용하려하였으나 에러가 많아서 포기
-            // sign 으로 로그인시 유저정보를 패칭하는 것으로 정리
-
             next() // 가던길로 보낸다
         })
         .catch((e) => {
-            // 로그인이 필요한 페이지인데 로그인이 안되어있거나 권한이 없는 경우
-            // next(`/block/${e.message}`)
-            next(`/block/${e.message.replace(/\//gi, ' ')}`) // '/'를 공백처리
+            // next(`/block/${e.message.replace(/\//gi, ' ')}`) // 블로킹 페이지로 가던것을 막았다...
+            if (!e.response) store.commit('pop', { msg: e.message, color: 'warning' })
+            next(false) // 이제 못가게 막는걸로 변경되었다.
 
             // * 토큰 유효기간이 끝난 경우 기존 토큰을 모두 삭제하고 로그인창으로 보낸다.
             // * 난제 : 로그인 되었고 단지 레벨이 안맞을 뿐인데도 토큰을 삭제하는 문제가 발생함.
@@ -150,11 +158,11 @@ export default new Router({
             component: useComponent('manage/boards'),
             beforeEnter: pageCheck
         },
-        {
-            path: '/block/:msg',
-            name: '차단',
-            component: useComponent('block')
-        },
+        // {
+        //     path: '/block/:msg',
+        //     name: '차단',
+        //     component: useComponent('block')
+        // },
         {
             path: '/sign',
             name: '로그인',
@@ -184,18 +192,6 @@ export default new Router({
         //     path: '/test2',
         //     name: 'test2',
         //     component: useComponent('Test2')
-        // },
-        // {
-        //     path: '/header',
-        //     name: '헤더',
-        //     component: () => import('./views/header'),
-        //     // beforeEnter: authCheck - 로그인이 필요한 서비스가 된다.
-        //     beforeEnter: (to, from, next) => {
-        //         // console.log(to)
-        //         // console.log(from)
-        //         if (!localStorage.getItem('token')) return next('block')
-        //         next()
-        //     }
-        // },
+        // }
     ]
 })

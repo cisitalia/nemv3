@@ -1,8 +1,12 @@
-var express = require('express')
-var createError = require('http-errors')
-var router = express.Router()
+const router = require('express').Router()
+const createError = require('http-errors')
 
 const Board = require('../../../models/boards')
+
+router.all('*', function (req, res, next) {
+    // if (req.user.lv) return res.send({ success: false, msg: '권한이 없습니다.' })
+    next()
+})
 
 // 게시판 목록 중 특정 게시판의 이름으로 해당 게시판이 있는지 확인한다.
 router.get('/read/:name', function (req, res, next) {
@@ -31,10 +35,6 @@ router.get('/list', (req, res, next) => {
         .catch(e => {
             res.send({ success: false, msg: e.message })
         })
-})
-
-router.all('*', function (req, res, next) {
-    next(createError(404, '그런 api 없어'));
 })
 
 module.exports = router;

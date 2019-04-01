@@ -1,6 +1,5 @@
-var express = require('express')
-var createError = require('http-errors')
-var router = express.Router()
+const router = require('express').Router()
+const createError = require('http-errors')
 
 const Site = require('../../../models/sites')
 
@@ -10,13 +9,8 @@ router.get('/', function (req, res, next) {
             res.send({ success: true, d: r, token: req.token })
         })
         .catch(e => {
-            res.send({ success: false })
+            res.send({ success: false, msg: e.message })
         })
 })
-
-// error 처리
-router.all('*', function (req, res, next) {
-    next(createError(404, '그런 api는 없다규'))
-});
 
 module.exports = router;

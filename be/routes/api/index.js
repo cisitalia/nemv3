@@ -1,10 +1,8 @@
-var express = require('express')
-var createError = require('http-errors')
-var router = express.Router()
+const router = require('express').Router()
+const createError = require('http-errors')
 
 const jwt = require('jsonwebtoken')
 const cfg = require('../../../config')
-
 const moment = require('moment')
 
 //////////////////////////////////////////////////////////////
@@ -106,32 +104,7 @@ router.all('*', (req, res, next) => {
             req.token = v.token
             next()
         })
-        .catch(e => { // 토큰검사시 에러가 발생하면 이쪽으로 온다.
-            if (process.env.NODE_ENV === 'development') {
-                console.error('ERROR - token not valid')
-            }
-            res.send({ success: false, msg: '[ERR01-TOKEN] ' + e.message })
-        })
-    /*
-    const token = req.headers.authorization
-    verifyToken(token)
-        .then(v => {
-            // 생성된 토큰을 찍어본다.
-            console.log(v) // 전체 토큰 객체를 찍어본다
-            console.log(new Date(v.exp * 1000)) // 만료시간만 찍어보자
-            const diff = moment(v.exp * 1000).diff(moment(), 'seconds') // 만료시간과 현재시간을 차를 초로 구한다.
-            console.log(diff) // 차이(초)를 찍어본다
-
-            // * req.user 변수에 유저정보를 넣는다. id/age/lv 정보가 들어있다
-            // 토큰을 풀어놓은 req.user는 중요한 데이터다!
-            req.user = v
-            next()
-        })
-        .catch(e => {
-            console.error('ERROR - token not valid')
-            res.send({ success: false, msg: '[ERR01 - SignIn] ' + e.message })
-        })
-    */
+        .catch(e => next(createError(401, e.message))) // 401 에러는 인증에러
 })
 
 // 테스트 : http://localhost:3000/api/ 으로 들어가면 유저정보를 볼 수 있다.
@@ -152,29 +125,19 @@ router.use('/article', require('./article'))
 // 위에서 생성한 req.user 를 이용해 req.user.lv 로 관리자 인증시도
 router.use('/manage', require('./manage'))
 
-router.all('*', function (req, res, next) {
-
-    // 로그인한 유저의 토큰을 풀어놓은 정보는 req.user에 담겨있다
-    // console.log(req.user)
-
-    // 또 검사해도 됨
-    if (req.user.lv > 2) return res.send({ success: false, msg: '권한이 없습니다.' })
-    next()
-})
+// router.all('*', function (req, res, next) {
+//     // 로그인한 유저의 토큰을 풀어놓은 정보는 req.user에 담겨있다
+//     // console.log(req.user)
+//     // 또 검사해도 됨
+//     if (req.user.lv > 2) return res.send({ success: false, msg: '권한이 없습니다.' })
+//     next()
+// })
 
 // 라우터 모듈 분기 - 아래 api는 보호받고 있다
-router.use('/test', require('./test')) // test 폴더
-router.use('/user', require('./user')) // user 폴더
+// router.use('/test', require('./test')) // test 폴더
+// router.use('/user', require('./user')) // user 폴더
 
-// 경로에러 처리(라우터에 등록되지 않은 경로인 경우 에러 발생)
-// app.js 에서 app.use('/api', require('./routes/api')) 로 보내고 있으니
-// 위의 라우트 모듈 분기에 따라
-// /api/test/~
-// /api/user/~
-// 위 두가지 경우가 아니면 없는 경로이므로 에러가난다.
-// 에러가 난 경우 다시 app.js 의 에러처리 루틴으로 보내버린다.
-router.all('*', function(req, res, next) {
-  next(createError(404, '그런 api는 없다규'))
-});
+// 새로 추가 :: 없는 경로인 경우 404 라우터로 뺀다!
+router.all('*', require('./notFound'))
 
-module.exports = router;
+module.exports = router

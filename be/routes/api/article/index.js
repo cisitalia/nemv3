@@ -1,4 +1,4 @@
-const router = express.Router()
+const router = require('express').Router()
 const createError = require('http-errors')
 
 const Board = require('../../../models/boards')
@@ -26,7 +26,7 @@ router.get('/list/:_board', (req, res, next) => {
     const _board = req.params._board
     // 검색처리
     let { search, sort, order, skip, limit } = req.query
-    if (!(sort && order && skip && limit)) return res.send({ success: false, msg: '잘못된 요청입니다' })
+    if (!(sort && order && skip && limit)) throw createError(400, '잘못된 요청입니다')
     if (!search) search = ''
     order = parseInt(order)
     limit = parseInt(limit)
@@ -67,10 +67,10 @@ router.get('/read/:_id', (req, res, next) => {
     Article.findByIdAndUpdate(_id, { $inc: {'cnt.view': 1 } }, { new: true })
         .select('content cnt.view') // 내용(content)과 조회수를 가져온다.
         .then(r => {
-            //console.log(r)
+            if (!r) throw new Error('잘못된 게시판입니다')
             res.send({ success: true, d: r, token: req.token })
         })
-        .catch((e) => {
+        .catch(e => {
             res.send({ success: false, msg: e.message })
         })
 });
@@ -79,13 +79,13 @@ router.get('/read/:_id', (req, res, next) => {
 
 router.post('/:_board', (req, res, next) => {
     const _board = req.params._board
-    if (!_board) return res.send({ success: false, msg: '게시판이 선택되지 않았습니다' }) // 나중에 400 bad request 처리 예제
+    if (!_board) throw createError(400, '게시판이 선택되지 않았습니다')
     const { title, content } = req.body
 
     Board.findById(_board) // 먼저 board를 찾는다
         .then(r => {
-            if (!r) return res.send({ success: false, msg: '잘못된 게시판입니다' })
-            if (r.lv < req.user.lv) return res.send({ success: false, msg: '권한이 없습니다' })
+            if (!r) throw createError(400, '잘못된 게시판입니다')
+            if (r.lv < req.user.lv) throw createError(403, '권한이 없습니다')
             const atc = {
                 title,
                 content,
@@ -97,6 +97,7 @@ router.post('/:_board', (req, res, next) => {
             return Article.create(atc) // mongoose.Article.create()
         })
         .then(r => {
+            if (!r) throw new Error('게시물이 생성되지 않았습니다')
             res.send({ success: true, d: r, token: req.token })
         })
         .catch(e => {
@@ -106,7 +107,7 @@ router.post('/:_board', (req, res, next) => {
 
 router.put('/:_id', (req, res, next) => {
     // 손님은 수정 불가
-    if (!req.user._id) return res.send({ success: false, msg: '게시물 수정 권한이 없습니다' })
+    if (!req.user._id) throw createError(403, '게시물 수정 권한이 없습니다')
 
     // 파람으로 넘어온 게시물 아이디를 변수로 저장
     const _id = req.params._id
@@ -131,7 +132,7 @@ router.put('/:_id', (req, res, next) => {
 
 router.delete('/:_id', (req, res, next) => {
     // 손님은 삭제 불가
-    if (!req.user._id) return res.send({ success: false, msg: '게시물 삭제 권한이 없습니다' })
+    if (!req.user._id) throw createError(403, '게시물 삭제 권한이 없습니다')
 
     // 파람으로 넘어온 게시물 아이디를 변수로 저장
     const _id = req.params._id
@@ -162,9 +163,5 @@ router.delete('/:_id', (req, res, next) => {
             res.send({ success: false, msg: e.message })
         })
 })
-
-router.all('*', function (req, res, next) {
-    next(createError(404, '그런 api 없어'));
-});
 
 module.exports = router;
