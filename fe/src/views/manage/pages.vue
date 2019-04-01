@@ -104,7 +104,7 @@ export default {
     },
     methods: {
         getPages () {
-            this.$axios.get(`${this.$apiRootPath}manage/page`)
+            this.$axios.get(`manage/page`)
                 .then(r => {
                     this.pages = r.data.pages
                 })
@@ -122,7 +122,7 @@ export default {
             this.dialog = false
             const pId = this.putId // 임시로 다른 변수에 넣고
             this.putId = '' // 이 변수는 초기화
-            this.$axios.put(`${this.$apiRootPath}manage/page/${pId}`, {
+            this.$axios.put(`manage/page/${pId}`, {
                 name: this.pageName, lv: this.pageLv
             })
                 .then(r => {
@@ -136,7 +136,7 @@ export default {
         delPage () {
             const dId = this.putId
             this.putId = '' // 비운다
-            this.$axios.delete(`${this.$apiRootPath}manage/page/${dId}`)
+            this.$axios.delete(`manage/page/${dId}`)
                 .then(r => {
                     this.$store.commit('pop', { msg: '페이지 삭제 완료', color: 'success' })
                     this.getPages()

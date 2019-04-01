@@ -160,6 +160,8 @@
 
 <script>
 // import boardCard from '@/components/manage/boardCard'
+// vuex store 를 쓰기 위해서
+import store from '@/store.js'
 
 export default {
     // components: { boardCard },
@@ -221,10 +223,39 @@ export default {
                 // this.list()
             }
         },
-        // 라우트 감시 - 게시판을 변경하는 라우트를 감시한다
+        // 라우트 감시 - 게시판을 변경하는 라우트를 감시한다.
+        // 게시판에서 동적 라우트 매칭을 사용하면서 문제가 생김
         '$route' (to, from) {
             // console.log(to.path, from.path)
-            this.getBoard()
+
+            // this.$router.push(to.path) // not working
+            // location.href = to.path // 정상적으로 가지만 매끄럽지 못하고 게시판 메뉴가 닫힌다.(페이지 리로딩)
+            // this.$router.go(to.path) == location.href
+            // this.$router.replace(to.path) // not working
+
+            // ** 얘를 하면 바로 게시판을 들고 온다. 정상적인 루트를 타지 않으므로 pageCheck 을 타지 않는다.
+            // this.getBoard()
+
+            // ** 별수없이 여기서 페이지체크를 해야 한다.
+            this.$axios.post('page', { name: to.path })
+                .then((r) => {
+                    if (!r.data.success) throw new Error(r.data.msg)
+                    // next() // not function
+                    this.getBoard() // 이걸로 대체
+                })
+                .catch((e) => {
+                    // next(`/block/${e.message.replace(/\//gi, ' ')}`) // 블로킹 페이지로 가던것을 막았다...
+                    if (!e.response) store.commit('pop', { msg: e.message, color: 'warning' })
+                    // next(false) // not function 이제 못가게 막는걸로 변경되었다.
+
+                    // * 토큰 유효기간이 끝난 경우 기존 토큰을 모두 삭제하고 로그인창으로 보낸다.
+                    if (e.message.includes('ERR01-TOKEN') || e.message.includes('jwt expired')) {
+                        setTimeout(() => {
+                            store.commit('delToken')
+                            location.href = '/sign'
+                        }, 800)
+                    }
+                })
         }
     },
     computed: {

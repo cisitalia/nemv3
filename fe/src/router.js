@@ -102,11 +102,13 @@ export default new Router({
             component: () => import('./views/dashboard'),
             beforeEnter: pageCheck
         },
+        // * 동적 라우팅시 pageChaeck 가 안걸린다.
+        // fe/src/views/board/index.vue 에서 걸어준다.
         {
             path: '/board/:name',
             name: 'board',
-            component: () => import('./views/board'),
-            beforeEnter: pageCheck
+            component: () => import('./views/board')
+            // beforeEnter: pageCheck
         },
         {
             path: '/test/lv3',

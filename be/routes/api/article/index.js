@@ -78,6 +78,8 @@ router.get('/read/:_id', (req, res, next) => {
 // Article.deleteMany({}).then(r => console.log(r)) // 게시물 전체 지우기
 
 router.post('/:_board', (req, res, next) => {
+    if (!req.user) throw createError(403, '게시판을 읽을 권한이 없습니다')
+
     const _board = req.params._board
     if (!_board) throw createError(400, '게시판이 선택되지 않았습니다')
     const { title, content } = req.body
