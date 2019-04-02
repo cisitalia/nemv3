@@ -41,17 +41,18 @@ axios.interceptors.response.use(
         // console.log(error.response) // error.response.data.msg 에 에러메시지가 담겨온다, error.response.status에 상태가 있다
         switch (error.response.status) {
         case 400:
-            store.commit('pop', { msg: `잘못된 요청입니다(${error.response.status}:${error.message})`, color: 'error' })
+            // store.commit('pop', { msg: `잘못된 요청입니다(${error.response.status}:${error.response.data.msg})`, color: 'error' })
+            store.commit('pop', { msg: `잘못된 요청입니다(${error.response.data.msg}:${error.message})`, color: 'error' })
             break
         case 401:
             store.commit('delToken')
-            store.commit('pop', { msg: `인증 오류입니다(${error.response.status}:${error.message})`, color: 'error' })
+            store.commit('pop', { msg: `인증 오류입니다(${error.response.data.msg}:${error.message})`, color: 'error' })
             break
         case 403:
-            store.commit('pop', { msg: `이용 권한이 없습니다(${error.response.status}:${error.message})`, color: 'warning' })
+            store.commit('pop', { msg: `이용 권한이 없습니다(${error.response.data.msg}:${error.message})`, color: 'warning' })
             break
         default:
-            store.commit('pop', { msg: `알수 없는 오류입니다(${error.response.status}:${error.message})`, color: 'error' })
+            store.commit('pop', { msg: `알수 없는 오류입니다(${error.response.data.msg}:${error.message})`, color: 'error' })
             break
         }
         return Promise.reject(error)

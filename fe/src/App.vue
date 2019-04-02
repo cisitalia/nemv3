@@ -390,3 +390,12 @@ export default {
     }
 }
 </script>
+
+<style>
+/* .v-datatable__actions__select {
+    display: none;
+} */
+/* .v-datatable__actions__range-controls {
+    display: none;
+} */
+</style>

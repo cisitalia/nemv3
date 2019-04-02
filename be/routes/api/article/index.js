@@ -1,6 +1,9 @@
 const router = require('express').Router()
 const createError = require('http-errors')
 
+const request = require('request')
+const cfg = require('../../../../config')
+
 const Board = require('../../../models/boards')
 const Article = require('../../../models/articles')
 
@@ -77,36 +80,57 @@ router.get('/read/:_id', (req, res, next) => {
 
 // Article.deleteMany({}).then(r => console.log(r)) // 게시물 전체 지우기
 
+// 글작성 : 구글 리캡챠 적용
 router.post('/:_board', (req, res, next) => {
     if (!req.user) throw createError(403, '게시판을 읽을 권한이 없습니다')
 
     const _board = req.params._board
     if (!_board) throw createError(400, '게시판이 선택되지 않았습니다')
-    const { title, content } = req.body
 
-    Board.findById(_board) // 먼저 board를 찾는다
-        .then(r => {
-            if (!r) throw createError(400, '잘못된 게시판입니다')
-            if (r.lv < req.user.lv) throw createError(403, '권한이 없습니다')
-            const atc = {
-                title,
-                content,
-                _board, // _board: r._id 지만 동일한 board._id 이므로 이렇게 축약해도 된단다.
-                ip: '1.1.1.1',//req.ip,
-                _user: null // 손님일 경우 그냥 null 로 들어감. 손님도 게시물을 쓸 수 있는 로직
-            }
-            if (req.user._id) atc._user = req.user._id
-            return Article.create(atc) // mongoose.Article.create()
-        })
-        .then(r => {
-            if (!r) throw new Error('게시물이 생성되지 않았습니다')
-            res.send({ success: true, d: r, token: req.token })
-        })
-        .catch(e => {
-            res.send({ success: false, msg: e.message })
-        })
+    const { title, content, response } = req.body
+
+    if (!title) throw createError(400, '제목이 없습니다')
+    if (!content) throw createError(400, '내용이 없습니다')
+    if (!response) throw createError(400, '로봇 검증이 없습니다')
+
+    const ro = {
+        uri: 'https://www.google.com/recaptcha/api/siteverify',
+        json: true,
+        form: {
+            secret: cfg.recaptchaSecretKey,
+            response,
+            remoteip: req.ip
+        }
+    }
+
+    request.post(ro, (err, response, body) => {
+        if (err) throw createError(401, '로봇 검증 실패입니다')
+
+        Board.findById(_board) // 먼저 board를 찾는다
+            .then(r => {
+                if (!r) throw createError(400, '잘못된 게시판입니다')
+                if (r.lv < req.user.lv) throw createError(403, '권한이 없습니다')
+                const atc = {
+                    title,
+                    content,
+                    _board, // _board: r._id 지만 동일한 board._id 이므로 이렇게 축약해도 된단다.
+                    ip: '1.1.1.1',//req.ip,
+                    _user: null // 손님일 경우 그냥 null 로 들어감. 손님도 게시물을 쓸 수 있는 로직
+                }
+                if (req.user._id) atc._user = req.user._id
+                return Article.create(atc) // mongoose.Article.create()
+            })
+            .then(r => {
+                if (!r) throw new Error('게시물이 생성되지 않았습니다')
+                res.send({ success: true, d: r, token: req.token })
+            })
+            .catch(e => {
+                res.send({ success: false, msg: e.message })
+            })
+    })
 })
 
+// 글수정 : 구글 리캡챠 적용
 router.put('/:_id', (req, res, next) => {
     // 손님은 수정 불가
     if (!req.user._id) throw createError(403, '게시물 수정 권한이 없습니다')
@@ -114,22 +138,41 @@ router.put('/:_id', (req, res, next) => {
     // 파람으로 넘어온 게시물 아이디를 변수로 저장
     const _id = req.params._id
 
-    // Article.findOne({ _id })
-    Article.findById(_id) // 이게 더 간편하다
-        .then(r => {
-            if (!r) throw new Error('게시물이 존재하지 않습니다')
-            if (!r._user) throw new Error('손님 게시물은 수정이 안됩니다')
-            if (r._user.toString() !== req.user._id) throw new Error('본인이 작성한 게시물이 아닙니다') // 본인만 수정가능
+    const { title, content, response } = req.body
 
-            // 해당 1개의 데이터만 업데이트하고 갱신된 결과를 찾아서 리턴한다. 단 { new: true } 옵션을 줘야 한다.
-            return Article.findByIdAndUpdate(_id, { $set: req.body }, { new: true })
-        })
-        .then(r => {
-            res.send({ success: true, d: r, token: req.token })
-        })
-        .catch(e => {
-            res.send({ success: false, msg: e.message })
-        })
+    if (!title) throw createError(400, '제목이 없습니다')
+    if (!content) throw createError(400, '내용이 없습니다')
+    if (!response) throw createError(400, '로봇 검증이 없습니다')
+
+    const ro = {
+        uri: 'https://www.google.com/recaptcha/api/siteverify',
+        json: true,
+        form: {
+            secret: cfg.recaptchaSecretKey,
+            response,
+            remoteip: req.ip
+        }
+    }
+    request.post(ro, (err, response, body) => {
+        if (err) throw createError(401, '로봇 검증 실패입니다')
+
+        // Article.findOne({ _id })
+        Article.findById(_id) // 이게 더 간편하다
+            .then(r => {
+                if (!r) throw new Error('게시물이 존재하지 않습니다')
+                if (!r._user) throw new Error('손님 게시물은 수정이 안됩니다')
+                if (r._user.toString() !== req.user._id) throw new Error('본인이 작성한 게시물이 아닙니다') // 본인만 수정가능
+
+                // 해당 1개의 데이터만 업데이트하고 갱신된 결과를 찾아서 리턴한다. 단 { new: true } 옵션을 줘야 한다.
+                return Article.findByIdAndUpdate(_id, { $set: { title, content } }, { new: true })
+            })
+            .then(r => {
+                res.send({ success: true, d: r, token: req.token })
+            })
+            .catch(e => {
+                res.send({ success: false, msg: e.message })
+            })
+    })
 })
 
 router.delete('/:_id', (req, res, next) => {

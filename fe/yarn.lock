@@ -7828,6 +7828,16 @@ vue-momentjs@^0.1.2:
   resolved "https://registry.yarnpkg.com/vue-momentjs/-/vue-momentjs-0.1.2.tgz#db517335df0b21402df9c65d8c7a86833d42f32f"
   integrity sha512-gtUc5BIo2nPku4gxGDqAa9sWRjn7Utpp22+Fqrd9dMEeLYo+9NGiJ0XBUXh3hmKbAXj+kWuFklJX+BBUfeEjQA==
 
+vue-plugin-load-script@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/vue-plugin-load-script/-/vue-plugin-load-script-1.2.0.tgz#d8cfb0ed68a78f67e24c6254d864f0c77aa80108"
+  integrity sha512-QbWjZSFRToSP6S0nZFsH618PsTlZgSg8m8Xv602vezznLTHYd0wAXEw0jlYND7L6BMe0KcA7cvUwLROyfBlQ4w==
+
+vue-recaptcha@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/vue-recaptcha/-/vue-recaptcha-1.1.1.tgz#be38f4ffab500e7f4775f149a279bb962cf91f07"
+  integrity sha512-ThjujwmoLrDS6EeE7AGHmeGfWDhFOFUAyfPfSCXojYMoSwFOJv0LL0/86PqHwjHM69HIq0kBI9ps+JeIQa5V/A==
+
 vue-router@^3.0.1:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-3.0.2.tgz#dedc67afe6c4e2bc25682c8b1c2a8c0d7c7e56be"

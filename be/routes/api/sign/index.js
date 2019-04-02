@@ -2,7 +2,9 @@ const createError = require('http-errors')
 const router = require('express').Router()
 
 const crypto = require('crypto')
+const request = require('request')
 const jwt = require('jsonwebtoken')
+
 const cfg = require('../../../../config')
 const User = require('../../../models/users')
 
@@ -88,6 +90,50 @@ router.post('/in', (req, res, next) => {
             res.send({ success: false, msg: e.message})
         })
     */
+})
+
+// 기존 회원가입의 register 를 /sign/up 으로 변경
+// 구글 리캡챠 적용
+router.post('/up', (req, res, next) => {
+    const u = req.body
+    if (!u.id) throw createError(400, '아이디가 없습니다')
+    if (!u.pwd) throw createError(400, '비밀번호가 없습니다')
+    if (!u.name) throw createError(400, '이름이 없습니다.')
+    if (!u.response) throw createError(400, '로봇 검증이 없습니다')
+
+    const ro = {
+        uri: 'https://www.google.com/recaptcha/api/siteverify',
+        json: true,
+        form: {
+            secret: cfg.recaptchaSecretKey,
+            response: u.response,
+            remoteip: req.ip
+        }
+    }
+
+    request.post(ro, (err, response, body) => {
+        if (err) throw createError(401, '로봇 검증 실패입니다')
+
+        // >> async ~ await 방식 : 훨씬 간결하다
+        User.findOne({ id: u.id })
+            .then(async r => {
+                if (r) throw new Error('이미 등록된 아이디 입니다.')
+
+                // 새로운 유저 등록
+                const ru = await User.create(u) // 이렇게 편하게 되다니!
+
+                // crypto 모듈로 비밀번호 암호화하여 업데이트 : 아이디를 소금(salt)로 하여 저장
+                const pwd = await (crypto.scryptSync(ru.pwd, ru._id.toString(), 64, { N: 1024 }).toString('hex'))
+                await User.updateOne({ _id: ru._id }, { $set: { pwd } })
+
+                res.send({ success: true })
+            })
+            .catch(e => {
+                res.send({ success: false, msg: e.message })
+            })
+    })
+
+
 })
 
 module.exports = router;

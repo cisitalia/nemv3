@@ -22,15 +22,18 @@ const moment = require('moment')
 router.use('/sign', require('./sign')) // sign 폴더
 
 // 회원가입
-router.use('/register', require('./register')) // register 폴더
+// router.use('/register', require('./register')) // register 폴더
 
 // 사이트 관리는 타이틀,카피라이트,다크모드 등 사이트의 디자인 관련이다.
 // 때문에 권한과 상관없으니 여기 위치
 router.use('/site', require('./site')) // site 폴더
 
 // 게시판으로 보내는 미들웨어 - 토큰검사 위로 이동
-// 버그존재 - 레벨적용이 풀림. 최초 페이지 접근시에는 적용되나, 이후 게시판으로 이동시 풀림
+// 버그존재(해결) - 레벨적용이 풀림. 최초 페이지 접근시에는 적용되나, 이후 게시판으로 이동시 풀림
 router.use('/board', require('./board'))
+
+// 구글 리캡챠 적용 .. 테스트키로 테스트용도로 사용했던것 같다.
+router.use('/recaptcha', require('./recaptcha'))
 
 // 주어진 토큰을 키로 풀어내는 함수
 const verifyToken = (t) => {

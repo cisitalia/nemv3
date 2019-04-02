@@ -8,7 +8,7 @@
                         <v-spacer></v-spacer>
                     </v-toolbar>
                     <v-card-text>
-                        <form>
+                        <v-form>
                             <v-text-field
                                 v-model="form.id"
                                 v-validate="'required|min:2|max:12|alpha_num'"
@@ -51,10 +51,19 @@
                                 type="checkbox"
                                 required
                             ></v-checkbox>
+
+                            <vue-recaptcha
+                                ref="recaptcha"
+                                :sitekey="$cfg.recaptchaSiteKey"
+                                size="invisible"
+                                @verify="onVerify"
+                                @expired="onExpired"
+                            ></vue-recaptcha>
+
                             <v-spacer></v-spacer>
-                            <v-btn color="primary" @click="submit">가입</v-btn>
+                            <v-btn color="primary" @click="checkRobot">가입</v-btn>
                             <v-btn color="secondary" @click="clear">초기화</v-btn>
-                        </form>
+                        </v-form>
                     </v-card-text>
                 </v-card>
             </v-flex>
@@ -75,7 +84,8 @@ export default {
         form: {
             id: '',
             name: '',
-            pwd: ''
+            pwd: '',
+            response: ''
         },
         agree: null,
         dictionary: {
@@ -114,11 +124,28 @@ export default {
         this.$validator.localize('ko', this.dictionary)
     },
     methods: {
+        onVerify (r) {
+            this.form.response = r
+            this.$refs.recaptcha.reset()
+            this.submit()
+        },
+        onExpired () {
+            this.form.response = ''
+            this.$refs.recaptcha.reset()
+        },
+        checkRobot () {
+            if (this.form.response) this.submit()
+            else this.$refs.recaptcha.execute()
+        },
         submit () {
             this.$validator.validateAll()
                 .then(async response => {
                     if (!response) throw new Error('모두 기입해 주세요')
-                    const r = await this.$axios.post('register', this.form)
+
+                    // 기존 /api/register에서 /api/sign/up 으로 변경
+                    const r = await this.$axios.post('/sign/up', this.form)
+                    // const r = await this.$axios.post('register', this.form)
+
                     if (!r.data.success) {
                         await this.clear() // form clear
                         throw new Error(`서버가 거부했습니다. ${r.data.msg}`)

@@ -1,57 +1,38 @@
 <template>
-    <v-container grid-list-md>
+    <v-container fluid :grid-list-md="!$vuetify.breakpoint.xs" :class="$vuetify.breakpoint.xs ? 'pa-0' : ''">
         <v-layout row wrap>
             <v-flex xs12>
-                <v-card>
-                    <v-img
-                        class="white--text"
-                        height="70px"
-                        src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
-                    >
-                        <v-container fill-height fluid>
-                            <v-layout fill-height>
-                                <v-flex xs6 align-end flexbox>
-                                    <span class="headline">{{board.name}}</span>
-                                </v-flex>
-                                <v-flex xs6 align-end flexbox class="text-xs-right">
-                                    <span>{{board.rmk}}</span>
-                                </v-flex>
-                            </v-layout>
-                        </v-container>
-                    </v-img>
+                <v-card class="elevation-1">
+                    <v-card-title class="headline">
+                        <v-tooltip bottom>
+                            <span slot="activator">{{board.name}}</span>
+                            <span>{{board.rmk}}</span>
+                        </v-tooltip>
+                        <v-spacer></v-spacer>
+                        <div style="width: 300px">
+                            <v-text-field
+                                label="검색"
+                                append-icon="search"
+                                v-model="params.search"
+                                clearable
+                            ></v-text-field>
+                        </div>
+                        <v-spacer></v-spacer>
+                        <div style="width: 100px">
+                            <v-select
+                                :items="rowsPerPageItems"
+                                v-model="pagination.rowsPerPage"
+                                label="검색건수"
+                            ></v-select>
+                        </div>
+                        <v-chip outline color="grey darken-3">
+                            <v-icon left>list_alt</v-icon>{{pagination.totalItems}}건
+                        </v-chip>
+                    </v-card-title>
                 </v-card>
             </v-flex>
 
-            <!-- <v-flex xs12 sm6 md4 v-for="article in articles" :key="article._id">
-                {{article}}
-            </v-flex> -->
-            <v-flex xs12 sm4 offset-sm8>
-                <v-text-field
-                    label="검색"
-                    append-icon="search"
-                    v-model="params.search"
-                    clearable
-                ></v-text-field>
-            </v-flex>
-
             <v-flex xs12>
-                <!-- :rows-per-page-items=[5,15,30,50] 로 초기값 변경 -->
-                <!-- hide-actions 하단의 액션을 없앤다 -->
-                <!-- class : 'text-no-wrap' 은 늘어나도 랩하지 않음, 'text-truncate'은 ... 으로 랩 -->
-                <v-toolbar flat color="white">
-                    <v-chip outline color="grey darken-3">
-                        <v-icon left>list_alt</v-icon>{{pagination.totalItems}}건
-                    </v-chip>
-                    <v-spacer></v-spacer>
-                    <div style="width: 100px">
-                        <v-select
-                            :items="rowsPerPageItems"
-                            v-model="pagination.rowsPerPage"
-                            label="검색건수"
-                        ></v-select>
-                    </div>
-                </v-toolbar>
-
                 <v-data-table
                     :headers="headers"
                     :items="articles"
@@ -59,10 +40,23 @@
                     :pagination.sync="pagination"
                     rows-per-page-text=""
                     :loading="loading"
-                    class="elevation-0"
+                    class="elevation-1"
                     disable-initial-sort
                     :rows-per-page-items="rowsPerPageItems"
+                    hide-actions
+                    no-data-text="데이터가 없습니다"
+                    no-results-text="데이터가 없습니다"
                 >
+                    <!-- props.item 을 디스트럭쳐링함. 그리고 tr에 read(item)을 적용
+                    <template slot="items" slot-scope="{ item }">
+                        <tr @click="read(item)" style="cursor:pointer">
+                            <td class="hidden-sm-and-down">{{ id2date(item._id) }}</td>
+                            <td>{{ item.title }}</td>
+                            <td>{{ item._user ? item._user.id : '손님' }}</td>
+                            <td>{{ item.cnt.view }}</td>
+                            <td>{{ item.cnt.like }}</td>
+                        </tr>
+                    </template> -->
                     <template slot="items" slot-scope="props">
                         <td class="hidden-sm-and-down">{{ id2date(props.item._id) }}</td>
                         <td><a @click="read(props.item)">{{ props.item.title }}</a>
@@ -71,8 +65,23 @@
                         <td>{{ props.item.cnt.view }}</td>
                         <td>{{ props.item.cnt.like }}</td>
                     </template>
+
+                    <!-- footer 에 페이징 -->
+                    <template v-slot:footer>
+                        <td :colspan="headers.length" class="text-xs-center py-3">
+                            <v-pagination
+                                v-model="pagination.page"
+                                :length="pages"
+                                circle
+                                :total-visible="7"
+                            ></v-pagination>
+                        </td>
+                    </template>
+
                 </v-data-table>
-                <div class="text-xs-center pt-2">
+
+                <!-- table 바깥에 페이징을 보여줄 때 -->
+                <!-- <div class="text-xs-center pt-2">
                     <v-pagination
                         v-model="pagination.page"
                         :length="pages"
@@ -81,8 +90,8 @@
                         prev-icon="arrow_back"
                         next-icon="arrow_forward"
                     ></v-pagination>
-                    <!-- <v-btn @click="toggleOrder"><v-icon>keyboard_arrow_down</v-icon></v-btn> -->
-                </div>
+                </div> -->
+
             </v-flex>
         </v-layout>
 
@@ -99,7 +108,7 @@
             <v-icon>add</v-icon>
         </v-btn>
 
-        <v-dialog v-model="dialog" persistent max-width="500px">
+        <v-dialog v-model="dialog" persistent max-width="500px" :fullscreen="$vuetify.breakpoint.xs">
             <v-card v-if="!dlMode">
                 <v-card-title>
                     <span class="headline">{{selArticle.title}}</span>
@@ -125,31 +134,35 @@
                 <v-card-title>
                     <span class="headline">글 {{(dlMode === 1) ? '작성' : '수정'}}</span>
                 </v-card-title>
+                <v-divider></v-divider>
                 <v-card-text>
-                    <v-container grid-list-md>
-                        <v-layout wrap>
-                            <v-flex xs12>
-                                <v-text-field
-                                    label="제목"
-                                    persistent-hint
-                                    required
-                                    v-model="form.title"
-                                ></v-text-field>
-                            </v-flex>
-                            <v-flex xs12>
-                                <v-textarea
-                                    label="내용"
-                                    persistent-hint
-                                    required
-                                    v-model="form.content"
-                                ></v-textarea>
-                            </v-flex>
-                        </v-layout>
-                    </v-container>
+                    <v-form>
+                        <v-text-field
+                            label="제목"
+                            persistent-hint
+                            required
+                            v-model="form.title"
+                        ></v-text-field>
+                        <v-textarea
+                            label="내용"
+                            persistent-hint
+                            required
+                            v-model="form.content"
+                        ></v-textarea>
+
+                        <vue-recaptcha
+                            ref="recaptcha"
+                            :sitekey="$cfg.recaptchaSiteKey"
+                            size="invisible"
+                            @verify="onVerify"
+                            @expired="onExpired"
+                        >
+                        </vue-recaptcha>
+                    </v-form>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="green darken-1" flat @click="(dlMode === 1) ? add() : mod()">확인</v-btn>
+                    <v-btn color="green darken-1" flat @click="checkRobot()">확인</v-btn>
                     <v-btn color="red darken-1" flat @click.native="dialog = false">취소</v-btn>
                 </v-card-actions>
             </v-card>
@@ -159,12 +172,10 @@
 </template>
 
 <script>
-// import boardCard from '@/components/manage/boardCard'
 // vuex store 를 쓰기 위해서
 import store from '@/store.js'
 
 export default {
-    // components: { boardCard },
     data: () => ({
         board: {
             name: '로딩중...',
@@ -175,14 +186,15 @@ export default {
         lvs: [0, 1, 2, 3],
         form: {
             title: '',
-            content: ''
+            content: '',
+            response: ''
         },
         headers: [
-            { text: '날짜', value: '_id', sortable: true, width: '10%', class: 'hidden-sm-and-down grey lighten-4' },
-            { text: '제목', value: 'title', sortable: true, align: 'left', width: '45%', class: 'grey lighten-4' },
-            { text: '글쓴이', value: '_user', sortable: false, width: '25%', class: 'grey lighten-4' },
-            { text: '조회수', value: 'cnt.view', sortable: true, width: '10%', class: 'grey lighten-4' },
-            { text: '추천', value: 'cnt.like', sortable: true, width: '10%', class: 'grey lighten-4' }
+            { text: '날짜', value: '_id', sortable: true, width: '10%', class: 'hidden-sm-and-down' },
+            { text: '제목', value: 'title', sortable: true, align: 'left', width: '45%' },
+            { text: '글쓴이', value: '_user', sortable: false, width: '25%' },
+            { text: '조회수', value: 'cnt.view', sortable: true, width: '10%' },
+            { text: '추천', value: 'cnt.like', sortable: true, width: '10%' }
         ],
         loading: false,
         itemTotal: 0,
@@ -201,11 +213,12 @@ export default {
         timeout: null,
         // pagination: {},
         pagination: { // 초기값을 여기서 지정한다.
+            sortBy: '_id', // 아이디 정렬을 초기값으로
             descending: true, // 내림차순을 초기값으로
-            rowsPerPage: 5 // 리스트 갯수 초기값
+            rowsPerPage: 10 // 리스트 갯수 초기값
             // ,sortBy: 'title' // 정렬대상 초기값을 제목으로
         },
-        rowsPerPageItems: [ 1, 2, 5, 15, 30, 50 ]
+        rowsPerPageItems: [ 1, 2, 5, 10, 15, 30, 50 ]
     }),
     mounted () {
         this.getBoard()
@@ -279,6 +292,21 @@ export default {
         }
     },
     methods: {
+        onVerify (r) {
+            this.form.response = r
+            this.$refs.recaptcha.reset()
+            if (this.dlMode === 1) this.add()
+            else this.mod()
+        },
+        onExpired () {
+            this.form.response = ''
+            this.$refs.recaptcha.reset()
+        },
+        checkRobot () {
+            if (this.form.response === '') return this.$refs.recaptcha.execute()
+            if (this.dlMode === 1) this.add()
+            else this.mod()
+        },
         toggleOrder () { // test add - 정렬순서를 반대로
             this.pagination.descending = !this.pagination.descending
             this.list()
@@ -286,17 +314,13 @@ export default {
         addDialog () {
             this.dialog = true
             this.dlMode = 1
-            this.form = {
-                title: '',
-                content: ''
-            }
+            this.form.title = ''
+            this.form.content = ''
         },
         modDialog () {
             this.dlMode = 2
-            this.form = {
-                title: this.selArticle.title,
-                content: this.selArticle.content
-            }
+            this.form.title = this.selArticle.title
+            this.form.content = this.selArticle.content
         },
         getBoard () {
             this.$axios.get(`board/read/${this.$route.params.name}`)
@@ -413,7 +437,14 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+/* .v-datatable__actions__select {
+    visibility: hidden
+}
+.v-datatable__actions__range-controls {
+    display: none;
+} */
+
 .custom-text-truncate {
     /* white-space: nowrap !important; 얘를 지우면 두줄이 나온다. */
     overflow: hidden !important;

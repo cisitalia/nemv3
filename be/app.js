@@ -33,7 +33,7 @@ app.use(function(err, req, res, next) {
     res.status(err.status || 500)
     res.send({ msg: err.message })
     if (process.env.NODE_ENV !== 'production') {
-        console.error(err.message)
+        console.error('>>', err.message)
     }
 })
 
