@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /var/www/nemv/source
+cd /var/www/nemv3
 git pull
 yarn
 cd be
