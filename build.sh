@@ -9,4 +9,4 @@ cd fe
 yarn
 yarn build
 cd ..
-pm2 start
+pm2 start --env pr
