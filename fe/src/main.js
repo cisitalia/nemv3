@@ -4,6 +4,7 @@ import Vue from 'vue'
 import VeeValidate from 'vee-validate'
 import LoadScript from 'vue-plugin-load-script'
 import VueRecaptcha from 'vue-recaptcha'
+import VueAnalytics from 'vue-analytics'
 import './plugins/vuetify'
 import App from './App.vue'
 import router from './router'
@@ -23,16 +24,23 @@ Vue.prototype.$cfg = cfg // registe global cfg
 Vue.use(VeeValidate)
 Vue.use(VueMomentJS, moment)
 Vue.use(LoadScript)
-Vue.component('vue-recaptcha', VueRecaptcha) // 구글 리캡챠 컴포넌트를 전역 컴포넌트로 등록
+Vue.use(VueAnalytics, {
+    id: cfg.analyticsID,
+    router,
+    autoTracking: {
+        pageviewOnLoad: false
+    }
+})
+// Vue.component('vue-recaptcha', VueRecaptcha) // 구글 리캡챠 컴포넌트를 전역 컴포넌트로 등록
 
 // vue-plugin-load-script 플러그인을 사용한 동적 로딩
 Vue.loadScript('https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit')
-// .then(() => {
-//     Vue.component('vue-recaptcha', VueRecaptcha) // 구글 리캡챠 컴포넌트를 전역 컴포넌트로 등록
-// })
-// .catch((e) => {
-//     console.error(`google api load failed: ${e.message}`)
-// })
+    .then(() => {
+        Vue.component('vue-recaptcha', VueRecaptcha) // 구글 리캡챠 컴포넌트를 전역 컴포넌트로 등록
+    })
+    .catch((e) => {
+        console.error(`google api load failed: ${e.message}`)
+    })
 
 // Validator.localize('ko', ko)
 
