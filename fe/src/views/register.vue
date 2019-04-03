@@ -32,7 +32,7 @@
                             ></v-text-field>
                             <v-text-field
                                 v-model="form.name"
-                                v-validate="'required|min:4|max:20'"
+                                v-validate="'required|min:2|max:20'"
                                 :counter="20"
                                 :error-messages="errors.collect('name')"
                                 label="이름"
