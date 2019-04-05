@@ -3,13 +3,13 @@
         <v-layout wrap row>
             <v-flex xs12 sm6 md3 class="pb-2">
                 <small-card
-                    title="최근 게시물"
-                    number="343"
-                    tIcon="list"
-                    tIconColor="success"
-                    bIcon="update"
-                    bIconColor="primary"
-                    bText="3시간 전"
+                    :title="latest.title"
+                    :number="latest.number"
+                    :tIcon="latest.tIcon"
+                    :tIconColor="latest.tIconColor"
+                    :bIcon="latest.bIcon"
+                    :bIconColor="latest.bIconColor"
+                    :bText="latest.bText"
                 ></small-card>
             </v-flex>
             <v-flex xs12 sm6 md3 class="pb-2">
@@ -90,6 +90,29 @@ export default {
         trendCard,
         boardCard,
         linkCard
+    },
+    data: () => ({
+        latest: { // 최근게시물 초기값
+            title: '최근 게시물s',
+            number: '0',
+            tIcon: 'list',
+            tIconColor: 'success',
+            bIcon: 'update',
+            bIconColor: 'primary',
+            bText: ''
+        }
+    }),
+    computed: {
+    },
+    methods: {
+        getLatest () { // 최근 게시물
+            // 최근 게시물 정보를 가져오는 api 로 부터 데이터를 가져온다!
+            this.latest.number = 333
+            this.latest.bText = '3 시간 전'
+        }
+    },
+    mounted () {
+        this.getLatest()
     }
 }
 </script>

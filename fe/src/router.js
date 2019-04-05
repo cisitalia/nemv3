@@ -161,6 +161,13 @@ export default new Router({
             component: useComponent('manage/boards'),
             beforeEnter: pageCheck
         },
+        { // 파일 업로드 테스트용
+            path: '/user',
+            name: 'upload_test',
+            component: useComponent('user'),
+            beforeEnter: pageCheck
+        },
+
         // {
         //     path: '/block/:msg',
         //     name: '차단',

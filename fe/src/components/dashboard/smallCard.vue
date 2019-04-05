@@ -12,8 +12,8 @@
                 </v-flex>
                 <v-flex xs5>
                     <v-card-title primary-title>
-                        <v-avatar>
-                            <v-icon medium :color="tIconColor">{{tIcon}}</v-icon>
+                        <v-avatar size="50px">
+                            <v-icon large :color="tIconColor">{{tIcon}}</v-icon>
                         </v-avatar>
                     </v-card-title>
                 </v-flex>

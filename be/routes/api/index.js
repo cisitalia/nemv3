@@ -140,8 +140,9 @@ router.use('/manage', require('./manage'))
 // })
 
 // 라우터 모듈 분기 - 아래 api는 보호받고 있다
+router.use('/user', require('./user')) // user 폴더
 // router.use('/test', require('./test')) // test 폴더
-// router.use('/user', require('./user')) // user 폴더
+
 
 // 새로 추가 :: 없는 경로인 경우 404 라우터로 뺀다!
 router.all('*', require('./notFound'))

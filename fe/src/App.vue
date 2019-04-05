@@ -143,9 +143,14 @@
                                 <v-list-tile-title>회원가입</v-list-tile-title>
                             </v-list-tile>
                         </template>
-                        <v-list-tile v-else @click="signOut">
-                            <v-list-tile-title>로그아웃</v-list-tile-title>
-                        </v-list-tile>
+                        <template v-else>
+                            <v-list-tile @click="$router.push('/user')">
+                                <v-list-tile-title>유저 정보 수정</v-list-tile-title>
+                            </v-list-tile>
+                            <v-list-tile @click="signOut">
+                                <v-list-tile-title>로그아웃</v-list-tile-title>
+                            </v-list-tile>
+                        </template>
                     </v-list>
                 </v-menu>
             </v-toolbar-items>

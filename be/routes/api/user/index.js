@@ -1,6 +1,16 @@
 const router = require('express').Router()
 const createError = require('http-errors')
+const multer = require('multer')
 
+//* 파일 업로드 테스트
+// 경로와 콜백사이에 들어가는 'multer({...})' 가 미들웨어다.
+router.post('/', multer({ dest: 'public/' }).single('bin'), (req, res, next) => {
+    console.log(req.body)
+    console.log(req.file)
+    res.status(204).send() // 204(콘텐츠 없음): 서버가 요청을 성공적으로 처리했지만 콘텐츠를 제공하지 않는다.
+})
+
+/*
 const User = require('../../../models/users')
 
 router.get('/', function (req, res, next) {
@@ -52,5 +62,6 @@ router.delete('/:id', (req, res, next) => {
             res.send({ success: false, msg: e.message })
         })
 })
+ */
 
-module.exports = router;
+module.exports = router
