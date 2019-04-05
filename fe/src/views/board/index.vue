@@ -108,15 +108,19 @@
             <v-icon>add</v-icon>
         </v-btn>
 
-        <v-dialog v-model="dialog" persistent max-width="500px" :fullscreen="$vuetify.breakpoint.xs">
+        <!-- <v-dialog v-model="dialog" persistent :max-width="($vuetify.breakpoint.width - 100)"> -->
+        <v-dialog v-model="dialog" persistent max-width="600px" :fullscreen="$vuetify.breakpoint.xs">
+            <!-- <v-card v-if="!dlMode" :height="($vuetify.breakpoint.height - 200)"> -->
             <v-card v-if="!dlMode">
                 <v-card-title>
                     <span class="headline">{{selArticle.title}}</span>
                 </v-card-title>
+                <v-divider></v-divider>
                 <v-card-text>
                     {{selArticle.content}}
                 </v-card-text>
-                <v-card-actions>
+                <v-divider></v-divider>
+                <v-card-actions class="pa-3">
                     <v-spacer></v-spacer>
                     <v-btn color="warning darken-1" flat @click.native="modDialog()">수정</v-btn>
                     <v-btn color="error darken-1" flat @click.native="ca=true">삭제</v-btn>
@@ -160,6 +164,7 @@
                         </vue-recaptcha>
                     </v-form>
                 </v-card-text>
+                <v-divider></v-divider>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="green darken-1" flat @click="checkRobot()">확인</v-btn>
@@ -222,6 +227,7 @@ export default {
     }),
     mounted () {
         this.getBoard()
+        console.log('>> ', this.$vuetify.breakpoint.height)
     },
     watch: {
         pagination: {

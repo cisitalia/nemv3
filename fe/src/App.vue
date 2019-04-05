@@ -37,7 +37,7 @@
                                 >notifications</v-icon>
                                 <v-icon
                                     large
-                                    color="grey darken-1"
+                                    color="green darken-2"
                                 >
                                     account_box
                                 </v-icon>

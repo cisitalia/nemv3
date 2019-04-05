@@ -5,6 +5,7 @@ import VeeValidate from 'vee-validate'
 import LoadScript from 'vue-plugin-load-script'
 import VueRecaptcha from 'vue-recaptcha'
 import VueAnalytics from 'vue-analytics'
+import Trend from 'vuetrend'
 import './plugins/vuetify'
 import App from './App.vue'
 import router from './router'
@@ -31,7 +32,7 @@ Vue.use(VueAnalytics, {
         pageviewOnLoad: false
     }
 })
-// console.log(cfg)
+Vue.use(Trend)
 
 // Vue.component('vue-recaptcha', VueRecaptcha) // 구글 리캡챠 컴포넌트를 전역 컴포넌트로 등록
 
