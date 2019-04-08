@@ -227,7 +227,7 @@ export default {
     }),
     mounted () {
         this.getBoard()
-        console.log('>> ', this.$vuetify.breakpoint.height)
+        // console.log('>> ', this.$vuetify.breakpoint.height)
     },
     watch: {
         pagination: {

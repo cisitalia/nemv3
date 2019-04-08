@@ -8,67 +8,25 @@
         fixed
         app
         >
-            <!-- 로그인 & 관리자 -->
-            <v-toolbar flat class="transparent" v-if="$store.state.token && this.$store.state.userInfo.id !== 'rhduddnr'">
+            <v-toolbar flat class="transparent">
                 <v-list class="pa-0">
                     <v-list-tile avatar>
                         <v-list-tile-avatar>
-                            <img src="https://randomuser.me/api/portraits/men/85.jpg">
+                            <template v-if="$store.state.user.img">
+                                <img :src="$store.state.user.img">
+                            </template>
+                            <template v-else>
+                                <v-icon>account_circle</v-icon>
+                            </template>
                         </v-list-tile-avatar>
                         <v-list-tile-content>
-                            <v-list-tile-title>{{ this.$store.state.userInfo.name }}</v-list-tile-title>
-                        </v-list-tile-content>
-                    </v-list-tile>
-                </v-list>
-            </v-toolbar>
-            <!-- 로그인 & !관리자 -->
-            <v-toolbar flat class="transparent" v-else-if="$store.state.token && this.$store.state.userInfo.id === 'rhduddnr'">
-                <v-list class="pa-0">
-                    <v-list-tile avatar>
-                        <v-list-tile-avatar>
-                            <v-badge
-                                overlap
-                                color="orange"
-                            >
-                                <v-icon
-                                    slot="badge"
-                                    dark
-                                    small
-                                >notifications</v-icon>
-                                <v-icon
-                                    large
-                                    color="green darken-2"
-                                >
-                                    account_box
-                                </v-icon>
-                            </v-badge>
-                        </v-list-tile-avatar>
-                        <v-list-tile-content>
-                            <v-list-tile-title>{{ this.$store.state.userInfo.name }}</v-list-tile-title>
+                            <v-list-tile-title>{{ $store.state.user.name }}</v-list-tile-title>
                         </v-list-tile-content>
                         <v-list-tile-action>
                             <v-btn icon @click.native.stop="mini = !mini">
                                 <v-icon>chevron_left</v-icon>
                             </v-btn>
                         </v-list-tile-action>
-                    </v-list-tile>
-                </v-list>
-            </v-toolbar>
-            <!-- !로그인 & 손님 -->
-            <v-toolbar flat class="transparent" v-else>
-                <v-list class="pa-0">
-                    <v-list-tile avatar>
-                        <v-list-tile-avatar>
-                            <v-icon
-                                large
-                                color="grey darken-1"
-                            >
-                                sentiment_satisfied_alt
-                            </v-icon>
-                        </v-list-tile-avatar>
-                        <v-list-tile-content>
-                            <v-list-tile-title>손님</v-list-tile-title>
-                        </v-list-tile-content>
                     </v-list-tile>
                 </v-list>
             </v-toolbar>
@@ -118,9 +76,6 @@
                 <v-icon>loop</v-icon>
             </v-btn> -->
             <v-toolbar-title v-text="siteTitle"></v-toolbar-title>
-            <!-- <v-toolbar-title v-if="this.$store.state.userInfo.name">
-                {{ this.$store.state.userInfo.name }}
-            </v-toolbar-title> -->
             <v-toolbar-title>
                 [{{ this.$moment().format('YYYY.MM.DD') }} {{ this.$moment.weekdays(this.$moment().day()) }} 입니다.]
             </v-toolbar-title>

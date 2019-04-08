@@ -334,17 +334,53 @@ const res3 = tt2()
 // 정확히는 에러로 처리할 수도 있고 => reject(new Error('error!!!'))
 // 그냥 resolve() 가 아닌 else 상황이기도 하다.
 // resolve(1), reject(1) 는 둘다 1을 리턴한다. 즉, 상황에 따라 던지는 값일 뿐이다.
-const et = (a) => {
-    return new Promise((resolve, reject) => {
-        if (a >= 20) {
-            // resolve(1)
-            resolve(true)
-        }
-        // reject(new Error('error!!!')) // 에러를 던지거나
-        // reject(1)
-        reject('error! - invalid value : ' + a) // 임의의 값을 던지거나
-    })
-}
-et(20).then(echo).catch(e => echo(e)) // true
-et(10).then(echo).catch(e => echo(e)) // error! - invalid value : 10
-et(10).then(echo).catch(echo) // 더 간단히 : error! - invalid value : 10
+// const et = (a) => {
+//     return new Promise((resolve, reject) => {
+//         if (a >= 20) {
+//             // resolve(1)
+//             resolve(true)
+//         }
+//         // reject(new Error('error!!!')) // 에러를 던지거나
+//         // reject(1)
+//         reject('error! - invalid value : ' + a) // 임의의 값을 던지거나
+//     })
+// }
+// et(20).then(echo).catch(e => echo(e)) // true
+// et(10).then(echo).catch(e => echo(e)) // error! - invalid value : 10
+// et(10).then(echo).catch(echo) // 더 간단히 : error! - invalid value : 10
+
+///////////////////////////////////////////////////////////////////////////////////////
+// * 2진수, 10진수, 16진수 등.. 컴퓨터 세상은 바이트의 세상
+// echo(0x11) // 0x11 은 16진수로 17임 - 찍히는 결과는 17
+
+// // 아스키 코드 찍어 보기 33 ~ 124
+// echo(String.fromCharCode(65)) // A 아스키코드를 문자로
+// echo('ABCD'.charCodeAt(1)) // 66 (문자열 중 하나를 아스키 코드로 )
+
+// echo(String.fromCharCode(65, 83, 67, 73, 73)) // 'ASCII' 를 출력한다
+
+// // 아스키코드 숫자 출력: 48 ~ 57은 0 ~ 9 임
+// let numArr = []
+// for(let i = 48; i <= 57; i++) {
+//     numArr.push(String.fromCharCode(i))
+// }
+// echo(numArr)
+
+// // * 10진수 123 을 16진수로 변환
+// echo((123).toString(16)) // 7b
+// // 2진수로
+// echo((123).toString(2)) // 1111011
+
+// // 16진수 => 10진수
+// echo(parseInt('7b', 16)) // 123
+
+///////////////////////////////////////////////////////////////////////////////////////
+// * nodejs 의 버퍼시스템
+
+const fs = require('fs')
+fs.readFile('test.txt', (e, r) => {
+    if (e) return console.error(e.message)
+    console.log(r)
+})
+// result: <Buffer 36 31 20 36 32 20 36 33 20 36 34 20 30 4 ....
+// 16진수 데이터는 버퍼 형태로 가져온다.

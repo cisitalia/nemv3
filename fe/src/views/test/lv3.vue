@@ -15,9 +15,6 @@ export default {
         HelloWorld
     },
     mounted () {
-        // this.uId = localStorage.getItem('uId')
-        // console.log(this.$store.state.userId)
-        // console.log(this.$store.state.userInfo.name)
     }
 }
 </script>

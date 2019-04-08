@@ -1,11 +1,9 @@
 import Vue from 'vue'
-// import ko from 'vee-validate/dist/locale/ko'
-// import VeeValidate, { Validator } from 'vee-validate'
 import VeeValidate from 'vee-validate'
 import LoadScript from 'vue-plugin-load-script'
 import VueRecaptcha from 'vue-recaptcha'
 import VueAnalytics from 'vue-analytics'
-import Trend from 'vuetrend'
+import Trend from 'vuetrend' // v-sparkline 이 나와서 필요없다
 import './plugins/vuetify'
 import App from './App.vue'
 import router from './router'
@@ -22,6 +20,10 @@ Vue.config.productionTip = false
 
 Vue.prototype.$cfg = cfg // registe global cfg
 
+// ssl 붙인 후 제대로 동작함 - 실서버에선 https 로 들어가게
+// fe/config/index.js 의 httpsOnly 를 true 로 변경해야 함.
+if (process.env.NODE_ENV === 'production' && location.protocol === 'http:' && cfg.httpsOnly) location.replace(`https://${location.hostname}`)
+
 Vue.use(VeeValidate)
 Vue.use(VueMomentJS, moment)
 Vue.use(LoadScript)
@@ -33,8 +35,6 @@ Vue.use(VueAnalytics, {
     }
 })
 Vue.use(Trend)
-
-// Vue.component('vue-recaptcha', VueRecaptcha) // 구글 리캡챠 컴포넌트를 전역 컴포넌트로 등록
 
 // vue-plugin-load-script 플러그인을 사용한 동적 로딩
 Vue.loadScript('https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit')

@@ -30,24 +30,30 @@ const signToken = (_id, id, lv, name, rmb) => {
 // /sign/in 으로 들어오는 로그인시 아이디/비번/레벨 을 검사하고 토큰을 발행한다.
 router.post('/in', (req, res, next) => {
     // fs.readFile('a') // 500 인터널 서버 에러를 테스트 하기 위한 코드
-
     const { id, pwd, remember } = req.body
     if (!id) throw createError(400, '아이디가 없습니다')
     if (!pwd) throw createError(400, '비밀번호가 없습니다')
     if (remember === undefined) throw createError(400, '기억하기가 없습니다.')
 
     // >> async ~ await 방식 : 훨씬 간결하다
-    User.findOne({ id }).then(async r => {
+    // 몽구스 lean() 함수 : plain JSON 문자열을 리턴한다.
+    // 몽구스에서 받은 결과 객체는 변경할 수 없기 때문에 lean() 으로 받았다.
+    User.findOne({ id }).lean()
+        .then(async r => {
             if (!r) throw new Error('존재하지 않는 아이디 입니다.')
             const p = await (crypto.scryptSync(pwd, r._id.toString(), 64, { N: 1024 }).toString('hex')) // 비번풀기
             if (r.pwd !== p) throw new Error('비밀번호가 틀립니다')
 
-            const ui = { id: r.id, name: r.name, lv: r.lv, age: r.age } // 커스텀으로 추가한 유저정보
+            delete r.pwd // lean 으로 받은 객체이므로 삭제가능하다.
+
+            // const ui = { id: r.id, name: r.name, lv: r.lv, age: r.age } // 커스텀으로 추가한 유저정보
+            const ui = r // 유저 정보를 저장한다.
 
             // 리턴할 토큰
             const token = await signToken(r._id, r.id, r.lv, r.name, remember)
 
-            res.send({ success: true, token: token, ui: ui })
+            // res.send({ success: true, token: token, ui: ui })
+            res.send({ success: true, token: token, user: ui })
         })
         .catch(e => {
             res.send({ success: false, msg: e.message })

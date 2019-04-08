@@ -57,23 +57,22 @@ export default {
                 .then(r => {
                     if (!r.data.success) throw new Error(`[서버에러]: ${r.data.msg}`)
 
-                    // 토큰 저장
+                    // 로컬스토리지에 토큰 저장
                     localStorage.setItem('token', r.data.token)
-                    this.$store.commit('getToken')
 
-                    // 유저정보 저장
-                    localStorage.setItem('uId', r.data.ui.id)
-                    localStorage.setItem('uName', r.data.ui.name)
-                    localStorage.setItem('uLv', r.data.ui.lv)
-                    this.$store.commit('getLoginUserInfo', r.data.ui)
+                    // 로컬스코리지에 로그인 사용자 정보 저장
+                    localStorage.setItem('uName', r.data.user.name)
+                    localStorage.setItem('uId', r.data.user.id)
+                    localStorage.setItem('uLv', r.data.user.lv)
+                    localStorage.setItem('uImg', r.data.user.img)
+
+                    // * vuex에 토큰과 로그인 사용자 정보 변이 시킴
+                    this.$store.commit('getToken', r.data.user)
 
                     // this.$router.push('/')
                     // 유저레벨에 맞는 페이지로 이동 하도록 변경
-                    // console.log(r.data.ui.lv)
-                    this.$router.push(`/test/lv${r.data.ui.lv}`)
-
-                    // this.$router.push('/header')
-                    // location.href = '/header' // $router.push() 대신 이렇게 해도 된다
+                    // this.$router.push(`/test/lv${r.data.ui.lv}`)
+                    this.$router.push(`/test/lv${r.data.user.lv}`)
                 })
                 .catch(e => {
                     if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
