@@ -12,11 +12,11 @@
                 <v-list class="pa-0">
                     <v-list-tile avatar>
                         <v-list-tile-avatar>
-                            <template v-if="$store.state.user.img">
-                                <img :src="$store.state.user.img">
+                            <template v-if="$store.state.user.img === ''">
+                                <v-icon>account_circle</v-icon>
                             </template>
                             <template v-else>
-                                <v-icon>account_circle</v-icon>
+                                <img :src="$store.state.user.img">
                             </template>
                         </v-list-tile-avatar>
                         <v-list-tile-content>

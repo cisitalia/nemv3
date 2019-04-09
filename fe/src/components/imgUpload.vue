@@ -4,11 +4,14 @@
             name="bin"
             ref="pond"
             allow-multiple="false"
+            label-idle="파일을 여기로 끌어놓으세요"
             max-files="1"
             accepted-file-types="image/jpeg, image/png"
-            :server="server"
             v-bind:files="myFiles"
+            :server="server"
+            instantUpload="false"
             v-on:init="handleFilePondInit"
+            v-on:addfile="handleFileAdded"
             v-on:processfile="onload"
         />
     </div>
@@ -45,6 +48,12 @@ export default {
                     headers: {
                         Authorization: localStorage.getItem('token')
                     }
+                },
+                revert: {
+                    url: '/delImg',
+                    headers: {
+                        Authorization: localStorage.getItem('token')
+                    }
                 }
             }
         }
@@ -54,8 +63,14 @@ export default {
             // console.log('FilePond has initialized')
             // FilePond instance methods are available on `this.$refs.pond`
         },
-        onload (e, r) {
-            // console.log(r)
+        handleFileAdded () {
+            // console.log('File is added')
+        },
+        onload (e, r) { // 업로드가 끝나면 이벤트 발생!
+            // if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' }) // 에러!
+            if (r.fileSize && r.fileSize > 0) {
+                this.$emit('upload-complete')
+            }
         }
     },
     components: {

@@ -49,6 +49,33 @@ router.post('/', multer({ dest: 'public/' }).single('bin'), (req, res, next) => 
         .catch(e => next(e))
 })
 
+// 로그인한 유저의 이미지 가져오기
+router.get('/getImg', function (req, res, next) {
+    if (!req.user._id) throw createError(401, 'xxx')
+
+    User.findById(req.user._id).select('img')
+        .then(r => {
+            res.send({ success: true, user: r, token: req.token })
+        })
+        .catch(e => {
+            res.send({ success: false, msg: e.message })
+        })
+})
+
+// 이미지 삭제 - 로그인한 유저의 이미지를 삭제한다(실제로는 업데이트)
+router.delete('/delImg', (req, res, next) => {
+    if (!req.user._id) throw createError(401, 'xxx')
+
+    // 유저 이미지 필드를 '' 로 만든다.
+    User.findByIdAndUpdate(req.user._id, { $set: { img: '' } }, { new: true }).select('-img')
+        .then(r => {
+            res.send({ success: true, msg: r, token: req.token })
+        })
+        .catch(e => {
+            res.send({ success: false, msg: e.message })
+        })
+})
+
 /*
 const User = require('../../../models/users')
 
