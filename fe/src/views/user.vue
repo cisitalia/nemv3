@@ -127,7 +127,6 @@ export default {
     }),
     mounted () {
         // console.log('user>>> ', this.$store.state.user.img)
-        // this.getImg()
     },
     methods: {
         delImg () {

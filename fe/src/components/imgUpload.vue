@@ -13,6 +13,12 @@
             v-on:init="handleFilePondInit"
             v-on:addfile="handleFileAdded"
             v-on:processfile="onload"
+            labelButtonProcessItem="업로드해"
+            stylePanelLayout="compact"
+            allowFileSizeValidation="true"
+            maxFileSize="3MB"
+            labelMaxFileSizeExceeded="파일사이즈가 너무 큽니다"
+            labelMaxFileSize="파일사이즈는 {filesize} 이하여야 합니다"
         />
     </div>
 </template>
@@ -34,8 +40,11 @@ import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type'
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
 
+// add : Import filepond-plugin-file-validate-size plugin
+import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size'
+
 // Create component
-const FilePond = vueFilePond(FilePondPluginFileValidateType, FilePondPluginImagePreview)
+const FilePond = vueFilePond(FilePondPluginFileValidateType, FilePondPluginImagePreview, FilePondPluginFileValidateSize)
 
 export default {
     name: 'app',
@@ -44,13 +53,13 @@ export default {
             myFiles: [],
             server: {
                 url: `${this.$apiRootPath}user`,
-                process: {
+                process: { // 입력(업로드) : post 메소드로 보낸다
                     headers: {
                         Authorization: localStorage.getItem('token')
                     }
                 },
-                revert: {
-                    url: '/delImg',
+                revert: { // 삭제 : delete 보내야 한다.
+                    url: '/delImg', // 상단 url 뒤에 덧붙여진다. delete 메소드로 보내기 때문세 사실 필요없다!
                     headers: {
                         Authorization: localStorage.getItem('token')
                     }

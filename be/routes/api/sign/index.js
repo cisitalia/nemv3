@@ -44,7 +44,7 @@ router.post('/in', (req, res, next) => {
             const p = await (crypto.scryptSync(pwd, r._id.toString(), 64, { N: 1024 }).toString('hex')) // 비번풀기
             if (r.pwd !== p) throw new Error('비밀번호가 틀립니다')
 
-            delete r.pwd // lean 으로 받은 객체이므로 삭제가능하다.
+            delete r.pwd // pwd삭제. lean() 으로 받은 객체이므로 삭제가능하다.
 
             // const ui = { id: r.id, name: r.name, lv: r.lv, age: r.age } // 커스텀으로 추가한 유저정보
             const ui = r // 유저 정보를 저장한다.

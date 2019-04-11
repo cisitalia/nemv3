@@ -29,6 +29,19 @@
                             <v-icon left>list_alt</v-icon>{{pagination.totalItems}}건
                         </v-chip>
                     </v-card-title>
+
+                    <v-btn
+                        color="pink"
+                        dark
+                        small
+                        absolute
+                        bottom
+                        right
+                        fab
+                        @click="addDialog"
+                    >
+                        <v-icon>add</v-icon>
+                    </v-btn>
                 </v-card>
             </v-flex>
 
@@ -59,11 +72,13 @@
                     </template> -->
                     <template slot="items" slot-scope="props">
                         <td class="hidden-sm-and-down">{{ id2date(props.item._id) }}</td>
-                        <td><a @click="read(props.item)">{{ props.item.title }}</a>
+                        <td class="td-box">
+                            <v-icon small class='td-new-icon' color="orange">plus_one</v-icon>
+                            <a class="td-title" @click="read(props.item)">{{ props.item.title }}</a>
                         </td>
                         <td>{{ props.item._user ? props.item._user.id : '손님' }}</td>
-                        <td>{{ props.item.cnt.view }}</td>
-                        <td>{{ props.item.cnt.like }}</td>
+                        <td class="hidden-sm-and-down">{{ props.item.cnt.view }}</td>
+                        <td class="hidden-sm-and-down">{{ props.item.cnt.like }}</td>
                     </template>
 
                     <!-- footer 에 페이징 -->
@@ -95,36 +110,28 @@
             </v-flex>
         </v-layout>
 
-        <v-btn
-            color="pink"
-            dark
-            small
-            absolute
-            top
-            right
-            fab
-            @click="addDialog"
-        >
-            <v-icon>add</v-icon>
-        </v-btn>
-
         <!-- <v-dialog v-model="dialog" persistent :max-width="($vuetify.breakpoint.width - 100)"> -->
         <v-dialog v-model="dialog" persistent max-width="600px" :fullscreen="$vuetify.breakpoint.xs">
             <!-- <v-card v-if="!dlMode" :height="($vuetify.breakpoint.height - 200)"> -->
-            <v-card v-if="!dlMode">
+            <v-card light v-if="!dlMode">
                 <v-card-title>
                     <span class="headline">{{selArticle.title}}</span>
                 </v-card-title>
                 <v-divider></v-divider>
-                <v-card-text>
-                    {{selArticle.content}}
+                <!-- <v-card-text v-html="selArticle.content"></v-card-text> -->
+                <v-card-text height="500px">
+                    <p>내용</p>
+                    <viewer
+                        height="500px"
+                        :value="selArticle.content"
+                    />
                 </v-card-text>
                 <v-divider></v-divider>
                 <v-card-actions class="pa-3">
                     <v-spacer></v-spacer>
-                    <v-btn color="warning darken-1" flat @click.native="modDialog()">수정</v-btn>
+                    <v-btn v-show="IsEditable" color="warning darken-1" flat @click.native="modDialog()">수정</v-btn>
                     <v-btn color="error darken-1" flat @click.native="ca=true">삭제</v-btn>
-                    <v-btn color="secondary darken-1" flat @click.native="dialog = false">닫기</v-btn>
+                    <v-btn color="secondary darken-1" flat @click.native="closeArticleDialog()">닫기</v-btn>
                 </v-card-actions>
                 <v-card-text v-if="ca">
                     <v-alert v-model="ca" type="warning">
@@ -134,7 +141,7 @@
                     </v-alert>
                 </v-card-text>
             </v-card>
-            <v-card v-else>
+            <v-card light v-else>
                 <v-card-title>
                     <span class="headline">글 {{(dlMode === 1) ? '작성' : '수정'}}</span>
                 </v-card-title>
@@ -147,12 +154,20 @@
                             required
                             v-model="form.title"
                         ></v-text-field>
-                        <v-textarea
+                        <!-- <v-textarea
                             label="내용"
                             persistent-hint
                             required
                             v-model="form.content"
-                        ></v-textarea>
+                        ></v-textarea> -->
+                        <editor
+                            ref="tuiEditor"
+                            :value="editorText"
+                            :options="editorOptions"
+                            :html="editorHtml"
+                            height="500px"
+                            @change="onEditorChange"
+                        />
 
                         <vue-recaptcha
                             ref="recaptcha"
@@ -168,7 +183,7 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="green darken-1" flat @click="checkRobot()">확인</v-btn>
-                    <v-btn color="red darken-1" flat @click.native="dialog = false">취소</v-btn>
+                    <v-btn color="red darken-1" flat @click.native="closeArticleDialog()">취소</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -189,17 +204,12 @@ export default {
         articles: [],
         dialog: false,
         lvs: [0, 1, 2, 3],
-        form: {
-            title: '',
-            content: '',
-            response: ''
-        },
         headers: [
-            { text: '날짜', value: '_id', sortable: true, width: '10%', class: 'hidden-sm-and-down' },
-            { text: '제목', value: 'title', sortable: true, align: 'left', width: '45%' },
-            { text: '글쓴이', value: '_user', sortable: false, width: '25%' },
-            { text: '조회수', value: 'cnt.view', sortable: true, width: '10%' },
-            { text: '추천', value: 'cnt.like', sortable: true, width: '10%' }
+            { text: '날짜', value: '_id', sortable: true, width: '8%', class: 'hidden-sm-and-down' },
+            { text: '제목', value: 'title', sortable: true, align: 'left', width: '56%' },
+            { text: '글쓴이', value: '_user', sortable: false, width: '20%' },
+            { text: '조회수', value: 'cnt.view', sortable: true, width: '8%', class: 'hidden-sm-and-down' },
+            { text: '추천', value: 'cnt.like', sortable: true, width: '8%', class: 'hidden-sm-and-down' }
         ],
         loading: false,
         itemTotal: 0,
@@ -223,7 +233,22 @@ export default {
             rowsPerPage: 10 // 리스트 갯수 초기값
             // ,sortBy: 'title' // 정렬대상 초기값을 제목으로
         },
-        rowsPerPageItems: [ 1, 2, 5, 10, 15, 30, 50 ]
+        rowsPerPageItems: [ 1, 2, 5, 10, 15, 30, 50 ],
+        // form
+        form: {
+            title: '',
+            content: '',
+            response: ''
+        },
+        // toast editor
+        editorText: '',
+        editorOptions: {
+            minHeight: '500px',
+            usageStatistics: false, // 구글 ga 사용안함
+            hideModeSwitch: false // switch mode markdown and wysiwyg
+        },
+        editorHtml: '',
+        IsEditable: false // 수정가능 여부
     }),
     mounted () {
         this.getBoard()
@@ -322,11 +347,16 @@ export default {
             this.dlMode = 1
             this.form.title = ''
             this.form.content = ''
+
+            // add - toast editor 추가로 집어넣은 코드임!
+            this.editorText = ''
         },
         modDialog () {
             this.dlMode = 2
             this.form.title = this.selArticle.title
-            this.form.content = this.selArticle.content
+            // this.form.content = this.selArticle.content // 이건 무용지물이네
+            // add : toast editor 추가로 넣은 코드임
+            this.editorText = this.selArticle.content
         },
         getBoard () {
             this.$axios.get(`board/read/${this.$route.params.name}`)
@@ -388,6 +418,10 @@ export default {
             this.$axios.get(`article/read/${atc._id}`)
                 .then(({ data }) => {
                     if (!data.success) throw new Error(data.mgs)
+
+                    // 수정가능 여부 판단
+                    this.chkIsEditable(atc)
+
                     this.dlMode = 0
                     this.dialog = true
                     this.selArticle.content = data.d.content
@@ -438,6 +472,34 @@ export default {
             this.timeout = setTimeout(() => {
                 this.list()
             }, 1000)
+        },
+        // toast editor changed event handler
+        onEditorChange () {
+            // form.content 에 내용을 쳐 넣자!
+            this.form.content = this.$refs.tuiEditor.invoke('getValue')
+        },
+        // 수정 가능 여부 판단
+        // * 삭제 가능여부도 비슷하게 구현하면 됨
+        chkIsEditable (atc) {
+            if (!atc._user) { // 손님은 불가
+                this.IsEditable = false
+            } else {
+                // 손님이 아니면 로그인한 유저가 작성자인 경우만 가능 - 수정 버튼이 나옴
+                if (atc._user.id === this.$store.state.user.id) {
+                    this.IsEditable = true
+                } else {
+                    this.IsEditable = false
+                }
+            }
+        },
+        closeArticleDialog () {
+            this.ca = false // 삭제확인 창을 닫자(필요없어지면 없애자)
+
+            if (this.dlMode === 2) { // 수정이면 뷰로 간다
+                this.dlMode = 0
+            } else { // 아니면 닫자
+                this.dialog = false
+            }
         }
     }
 }
@@ -462,5 +524,36 @@ export default {
     overflow: hidden !important;
     white-space: nowrap !important;
     text-overflow: ellipsis !important;
+}
+
+.td-box {
+    /* position: relative; */
+    /* display: inline-block; /* 얘를 넣으면 위로 붙음*/
+    max-width: 100%;
+}
+
+.td-title {
+    /* margin-top: 3px; */
+    display: -webkit-box; /* 얘를 지우면 2줄 */
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1; /* 얘도 지우면 2줄 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-decoration: none;
+    vertical-align: middle;
+}
+
+.td-new-icon { /* 뒤에다 붙이기는 안되네 */
+    float: left;
+    margin-top: 1px;
+    margin-right: 3px;
+    /* position: absolute; */
+    /* display: inline-block; */
+    /* white-space: nowrap */
+}
+
+/* tui-editor-contents 높이 */
+.tui-editor-contents {
+    min-height: 400px;
 }
 </style>

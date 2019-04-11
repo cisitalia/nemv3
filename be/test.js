@@ -377,10 +377,14 @@ const res3 = tt2()
 ///////////////////////////////////////////////////////////////////////////////////////
 // * nodejs 의 버퍼시스템
 
+const buf = Buffer.from('abcd')
+console.log(buf)
+
 const fs = require('fs')
 fs.readFile('test.txt', (e, r) => {
     if (e) return console.error(e.message)
     console.log(r)
+    console.log(r.length)
 })
 // result: <Buffer 36 31 20 36 32 20 36 33 20 36 34 20 30 4 ....
 // 16진수 데이터는 버퍼 형태로 가져온다.

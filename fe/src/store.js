@@ -27,16 +27,14 @@ export default new Vuex.Store({
     },
     mutations: {
         // 로컬 스토리지에서 토큰을 가져와서 저장한다.
-        getToken (state, user) {
+        // getToken (state, user) {
+        getToken (state) {
             // 토큰 가져오기
             state.token = localStorage.getItem('token')
 
-            // 유저정보 가져오기
+            // 유저정보 가져오기 - getUserInfo로 따로 뺐다
             // state.user = user
-            state.user.name = localStorage.getItem('uName')
-            state.user.id = localStorage.getItem('uId')
-            state.user.lv = localStorage.getItem('uLv')
-            state.user.img = localStorage.getItem('uImg')
+            this.commit('getUserInfo')
         },
         // 로그아웃 처리 : 저장된 토큰을 없앤다
         delToken (state) {

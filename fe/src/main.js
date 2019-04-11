@@ -9,6 +9,12 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
+// import toast vue editor plugins & component
+import 'tui-editor/dist/tui-editor.css'
+import 'tui-editor/dist/tui-editor-contents.css'
+import 'codemirror/lib/codemirror.css'
+import { Editor, Viewer } from '@toast-ui/vue-editor'
+
 import cfg from '../config' // load conifg(/fe/config/index.js)
 
 // use moment
@@ -44,6 +50,11 @@ Vue.loadScript('https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLo
     .catch((e) => {
         console.error(`google api load failed: ${e.message}`)
     })
+
+// regist toast editor & viewer components
+// 토스트 에디터와 뷰어를 전역 컴포넌트로 등록한다!
+Vue.component('editor', Editor)
+Vue.component('viewer', Viewer)
 
 // Validator.localize('ko', ko)
 

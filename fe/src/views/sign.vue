@@ -71,7 +71,8 @@ export default {
                     }
 
                     // * vuex에 토큰과 로그인 사용자 정보 변이 시킴
-                    this.$store.commit('getToken', data.user)
+                    // this.$store.commit('getToken', data.user)
+                    this.$store.commit('getToken')
 
                     // this.$router.push('/')
                     // 유저레벨에 맞는 페이지로 이동 하도록 변경
