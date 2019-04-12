@@ -111,11 +111,19 @@
         </v-layout>
 
         <!-- <v-dialog v-model="dialog" persistent :max-width="($vuetify.breakpoint.width - 100)"> -->
-        <v-dialog v-model="dialog" persistent max-width="600px" :fullscreen="$vuetify.breakpoint.xs">
+        <v-dialog v-model="dialog" max-width="800px" :fullscreen="$vuetify.breakpoint.xs">
+
             <!-- <v-card v-if="!dlMode" :height="($vuetify.breakpoint.height - 200)"> -->
             <v-card light v-if="!dlMode">
                 <v-card-title>
                     <span class="headline">{{selArticle.title}}</span>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                        icon
+                        @click="dialog=!dialog"
+                    >
+                        <v-icon>clear</v-icon>
+                    </v-btn>
                 </v-card-title>
                 <v-divider></v-divider>
                 <!-- <v-card-text v-html="selArticle.content"></v-card-text> -->
@@ -133,6 +141,7 @@
                     <v-btn color="error darken-1" flat @click.native="ca=true">삭제</v-btn>
                     <v-btn color="secondary darken-1" flat @click.native="closeArticleDialog()">닫기</v-btn>
                 </v-card-actions>
+
                 <v-card-text v-if="ca">
                     <v-alert v-model="ca" type="warning">
                         <h4>정말 진행 하시겠습니까?</h4>
@@ -140,10 +149,65 @@
                         <v-btn color="secondary" @click="ca=false">취소</v-btn>
                     </v-alert>
                 </v-card-text>
+
+                <v-divider></v-divider>
+                <v-card-text>
+                    <v-text-field
+                        label="댓글 작성"
+                        v-model="formComment.content"
+                        append-icon="message"
+                        clear-icon="cancel"
+                        clearable
+                        outline
+                        @keyup.enter="checkRobot"
+                        @click:append="checkRobot"
+                        @click:clear="clearComment"
+                    ></v-text-field>
+                </v-card-text>
+                <v-divider></v-divider>
+                <v-list two-line v-for="comment in selArticle._comments" :key="comment._id">
+                    <v-list-tile>
+                        <v-list-tile-content>
+                            <v-list-tile-sub-title>작성자 : {{comment._user ? comment._user.id : '손님'}}</v-list-tile-sub-title>
+                            <v-list-tile-title>{{comment.content}}</v-list-tile-title>
+                        </v-list-tile-content>
+                        <v-list-tile-action>
+                            <v-btn
+                                icon
+                                ripple
+                                @click="commentDialogOpen(comment)"
+                            >
+                                <v-icon color="warning lighten-1">
+                                create
+                                </v-icon>
+                            </v-btn>
+                        </v-list-tile-action>
+                        <v-list-tile-action>
+                            <v-btn
+                                icon
+                                ripple
+                                @click="delComment(comment)"
+                            >
+                                <v-icon color="error">
+                                    clear
+                                </v-icon>
+                            </v-btn>
+                        </v-list-tile-action>
+                    </v-list-tile>
+                    <v-divider></v-divider>
+                </v-list>
             </v-card>
+
             <v-card light v-else>
                 <v-card-title>
                     <span class="headline">글 {{(dlMode === 1) ? '작성' : '수정'}}</span>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                        icon
+                        @click="dialog=!dialog"
+                    >
+                        <v-icon>clear</v-icon>
+                    </v-btn>
                 </v-card-title>
                 <v-divider></v-divider>
                 <v-card-text>
@@ -166,17 +230,9 @@
                             :options="editorOptions"
                             :html="editorHtml"
                             height="500px"
+                            :exts="editorExt"
                             @change="onEditorChange"
                         />
-
-                        <vue-recaptcha
-                            ref="recaptcha"
-                            :sitekey="$cfg.recaptchaSiteKey"
-                            size="invisible"
-                            @verify="onVerify"
-                            @expired="onExpired"
-                        >
-                        </vue-recaptcha>
                     </v-form>
                 </v-card-text>
                 <v-divider></v-divider>
@@ -187,6 +243,32 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+
+        <v-dialog width="800" v-model="commentDialog">
+            <v-card min-height="400px">
+                <v-card-text>
+                    <v-text-field
+                        label="댓글 수정"
+                        v-model="selComment.content"
+                        @keyup.enter="modComment()"
+                    >
+                    </v-text-field>
+                </v-card-text>
+                <v-card-actions>
+                    <v-btn color="warning" @click="modComment()">수정</v-btn>
+                    <v-btn color="secondary" @click="commentDialog = false">닫기</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <vue-recaptcha
+            ref="recaptcha"
+            :sitekey="$cfg.recaptchaSiteKey"
+            size="invisible"
+            @verify="onVerify"
+            @expired="onExpired"
+        >
+        </vue-recaptcha>
 
     </v-container>
 </template>
@@ -199,10 +281,12 @@ export default {
     data: () => ({
         board: {
             name: '로딩중...',
+            title: '로딩중...',
             rmk: '무엇?'
         },
         articles: [],
         dialog: false,
+        commentDialog: false,
         lvs: [0, 1, 2, 3],
         headers: [
             { text: '날짜', value: '_id', sortable: true, width: '8%', class: 'hidden-sm-and-down' },
@@ -212,17 +296,22 @@ export default {
             { text: '추천', value: 'cnt.like', sortable: true, width: '8%', class: 'hidden-sm-and-down' }
         ],
         loading: false,
-        itemTotal: 0,
-        getTotalPage: 1,
+        // itemTotal: 0,
+        // getTotalPage: 1,
         dlMode: 0, // 0: read, 1: write, 2: modify
-        selArticle: {},
+        selArticle: {
+            _comments: []
+        },
+        selComment: {
+            content: ''
+        },
         ca: false,
         params: {
             draw: 0,
             search: '',
             skip: 0,
             sort: '_id',
-            order: 0,
+            order: -1,
             limit: 1
         },
         timeout: null,
@@ -235,8 +324,13 @@ export default {
         },
         rowsPerPageItems: [ 1, 2, 5, 10, 15, 30, 50 ],
         // form
-        form: {
+        form: { // article form
             title: '',
+            content: '',
+            response: ''
+        },
+        response: '',
+        formComment: { // comment form
             content: '',
             response: ''
         },
@@ -248,6 +342,7 @@ export default {
             hideModeSwitch: false // switch mode markdown and wysiwyg
         },
         editorHtml: '',
+        editorExt: [ 'colorSyntax', 'scrollSync' ],
         IsEditable: false // 수정가능 여부
     }),
     mounted () {
@@ -323,20 +418,39 @@ export default {
         }
     },
     methods: {
+        // 댓글 다이얼로그 오픈
+        commentDialogOpen (c) {
+            this.commentDialog = true
+            this.selComment = c
+        },
+        // 구글 리캡챠 유효성 체크
         onVerify (r) {
-            this.form.response = r
+            // this.form.response = r
+            // this.$refs.recaptcha.reset()
+            // if (this.dlMode === 1) this.add()
+            // else this.mod()
+
+            // 댓글이 추가되면서 수정됨. 댓글 등록시에도 구글 리캡챠 사용
+            this.response = r
             this.$refs.recaptcha.reset()
-            if (this.dlMode === 1) this.add()
-            else this.mod()
+            if (this.dlMode === 0) this.addComment()
+            else if (this.dlMode === 1) this.add()
+            else if (this.dlMode === 2) this.mod()
         },
         onExpired () {
             this.form.response = ''
             this.$refs.recaptcha.reset()
         },
         checkRobot () {
-            if (this.form.response === '') return this.$refs.recaptcha.execute()
-            if (this.dlMode === 1) this.add()
-            else this.mod()
+            // if (this.form.response.length) return this.$refs.recaptcha.execute()
+            // if (this.dlMode === 1) this.add()
+            // else this.mod()
+
+            // 댓글이 추가되면서 수정됨. 댓글 등록시에도 구글 리캡챠 사용
+            if (!this.response.length) return this.$refs.recaptcha.execute()
+            if (this.dlMode === 0) this.addComment()
+            else if (this.dlMode === 1) this.add()
+            else if (this.dlMode === 2) this.mod()
         },
         toggleOrder () { // test add - 정렬순서를 반대로
             this.pagination.descending = !this.pagination.descending
@@ -372,6 +486,10 @@ export default {
         add () {
             if (!this.form.title) return this.$store.commit('pop', { msg: '제목을 작성해주세요', color: 'warning' })
             if (!this.form.content) return this.$store.commit('pop', { msg: '내용을 작성해주세요', color: 'warning' })
+
+            // 구글 리갭챠 응답처리 추가
+            this.form.response = this.response
+
             this.$axios.post(`article/${this.board._id}`, this.form)
                 .then(({ data }) => {
                     if (!data.success) throw new Error(data.mgs)
@@ -426,6 +544,11 @@ export default {
                     this.dialog = true
                     this.selArticle.content = data.d.content
                     this.selArticle.cnt.view = data.d.cnt.view
+
+                    // 댓글 읽기 추가
+                    // data.d._comments.forEach(v => { v.mod = false })
+                    this.selArticle._comments = data.d._comments
+
                     this.loading = false
                 })
                 .catch(e => {
@@ -500,6 +623,46 @@ export default {
             } else { // 아니면 닫자
                 this.dialog = false
             }
+        },
+        addComment () {
+            this.formComment.response = this.response
+            this.$axios.post(`comment/${this.selArticle._id}`, this.formComment)
+                .then(({ data }) => {
+                    if (!data.success) throw new Error(data.msg)
+                    this.formComment.content = ''
+                    this.read(this.selArticle)
+                    // this.list()
+                })
+                .catch((e) => {
+                    if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
+                })
+        },
+        delComment (cmt) {
+            this.$axios.delete(`comment/${cmt._id}`)
+                .then(({ data }) => {
+                    if (!data.success) throw new Error(data.msg)
+                    this.read(this.selArticle)
+                })
+                .catch((e) => {
+                    if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
+                })
+        },
+        modComment () {
+            if (!this.selComment.content) return this.$store.commit('pop', { msg: '내용을 작성해주세요', color: 'warning' })
+            this.commentDialog = false
+            this.$axios.put(`comment/${this.selComment._id}`, { content: this.selComment.content })
+                .then(({ data }) => {
+                    if (!data.success) throw new Error(data.msg)
+                    this.read(this.selArticle)
+                })
+                .catch((e) => {
+                    if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
+                })
+        },
+        // 댓글창을 비우는 메서드 : @click:clear 에 매핑되어있다.
+        clearComment () {
+            this.formComment.content = ''
+            this.selComment.content = ''
         }
     }
 }

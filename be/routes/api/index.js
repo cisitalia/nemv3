@@ -124,8 +124,10 @@ router.all('*', (req, res, next) => {
 // [방화벽 미들웨어] 페이지 생성(관리자) 및 페이지 진입(레벨에 따라)을 막는 api
 router.use('/page', require('./page'))
 
-// 게시물로 보내는 미들웨어 - 여기서 앞에서는 유저 권한 검사를 하는구나
+// 게시물로 보내는 미들웨어 - 여기 앞에서는 유저 권한 검사를 하는구나
 router.use('/article', require('./article'))
+// 댓글 api 로 보내는 미들웨어
+router.use('/comment', require('./comment'))
 
 // 관리용 api : 관리자만 접근가능 가능
 // 위에서 생성한 req.user 를 이용해 req.user.lv 로 관리자 인증시도

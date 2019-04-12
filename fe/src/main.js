@@ -10,9 +10,12 @@ import router from './router'
 import store from './store'
 
 // import toast vue editor plugins & component
+import 'codemirror/lib/codemirror.css'
 import 'tui-editor/dist/tui-editor.css'
 import 'tui-editor/dist/tui-editor-contents.css'
-import 'codemirror/lib/codemirror.css'
+import 'tui-editor/dist/tui-editor-extScrollSync.js'
+import 'tui-editor/dist/tui-editor-extColorSyntax.js'
+import 'highlight.js/styles/github.css'
 import { Editor, Viewer } from '@toast-ui/vue-editor'
 
 import cfg from '../config' // load conifg(/fe/config/index.js)

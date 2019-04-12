@@ -2,10 +2,12 @@ const router = require('express').Router()
 const createError = require('http-errors')
 
 const request = require('request')
-const cfg = require('../../../../config')
 
 const Board = require('../../../models/boards')
 const Article = require('../../../models/articles')
+const Comment = require('../../../models/comments')
+
+const cfg = require('../../../../config')
 
 // 1) 몽구스 검색로직
 // Article.find({ title: 'aaaa' }) // 이렇게 해도 되고
@@ -67,11 +69,27 @@ router.get('/list/:_board', (req, res, next) => {
 router.get('/read/:_id', (req, res, next) => {
     const _id = req.params._id
 
+    let atc = {} // 게시물을 담을 객체
+
     Article.findByIdAndUpdate(_id, { $inc: {'cnt.view': 1 } }, { new: true })
-        .select('content cnt.view') // 내용(content)과 조회수를 가져온다.
+        .lean() // 검색 결과를 몽구스객체에서 오브젝트객체로 변경하기 위해 lean() 사용
+        .select('content cnt') // 내용(content)과 조회수를 가져온다.
         .then(r => {
             if (!r) throw new Error('잘못된 게시판입니다')
-            res.send({ success: true, d: r, token: req.token })
+            // res.send({ success: true, d: r, token: req.token })
+
+            // 게시물과 함께 딸린 댓글을 5개만 패칭한다.
+            atc = r // atc에 검색결과를 저장
+            atc._comments = [] // 댓글을 담을 배열을 따로 만든다.
+            // 댓글 검색 - 게시물 아이디를 키로 검색한다.
+            return Comment.find({ _article: atc._id })
+                    .populate({ path: '_user', select: 'id name' }) // 유저의 아이디와 이름을 가져온다.
+                    .sort({ _id: 1 }) // 댓글 아이디의 오름차순 정렬(내림차순은 -1)
+                    .limit(5) // 항상 리미트를 걸어주는 습관!
+        })
+        .then(rs => {
+            if (rs) atc._comments = rs
+            res.send({ success: true, d: atc, token: req.token })
         })
         .catch(e => {
             res.send({ success: false, msg: e.message })
@@ -103,6 +121,7 @@ router.post('/:_board', (req, res, next) => {
         }
     }
 
+    // 구글 리캡챠 검증을 위해 구글로 전송
     request.post(ro, (err, response, body) => {
         if (err) throw createError(401, '로봇 검증 실패입니다')
 

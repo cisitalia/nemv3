@@ -2,20 +2,21 @@
     <v-container fluid :grid-list-md="!$vuetify.breakpoint.xs">
         <v-layout wrap row>
             <!-- <hello-world/> -->
-            <v-flex xs12 sm6>
+            <v-flex xs12>
                 <editor
                     ref="tuiEditor"
-                    :value="editorText"
+                    v-model="editorText"
                     :options="editorOptions"
-                    :html="editorHtml"
                     :visible="editorVisible"
-                    previewStyle="tab"
+                    :html="editorHtml"
                     height="500px"
-                    mode="markdown"
                 />
             </v-flex>
-            <v-flex xs12 sm6>
-                <viewer :value="editorText"/>
+            <v-flex xs12>
+                <viewer
+                    :value="editorText"
+                    height="500px"
+                />
             </v-flex>
         </v-layout>
     </v-container>
@@ -30,8 +31,6 @@
 // import 'codemirror/lib/codemirror.css'
 // import { Editor, Viewer } from '@toast-ui/vue-editor'
 
-import 'highlight.js/styles/github.css'
-
 export default {
     components: {
         // 'hello-world': HelloWorld
@@ -39,7 +38,7 @@ export default {
         // 'viewer': Viewer
     },
     data: () => ({
-        editorText: '# This is initialValue.\n ```Hello World.```',
+        editorText: '# This is initialValue.',
         editorOptions: {
             usageStatistics: false, // 구글 ga 사용안함
             hideModeSwitch: false // switch mode markdown and wysiwyg

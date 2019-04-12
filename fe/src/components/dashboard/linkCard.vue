@@ -13,7 +13,12 @@
         <v-tabs-items v-model="tab">
             <v-tab-item v-for="article in articles" :key="article._id">
                 <v-card flat>
-                    <v-card-text v-html="article.content"></v-card-text>
+                    <!-- <v-card-text v-html="article.content"></v-card-text> -->
+                    <v-card-text>
+                        <viewer
+                            :value="article.content"
+                        />
+                    </v-card-text>
                 </v-card>
             </v-tab-item>
         </v-tabs-items>
