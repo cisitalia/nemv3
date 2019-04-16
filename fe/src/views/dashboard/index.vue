@@ -113,6 +113,7 @@ export default {
     },
     mounted () {
         this.getLatest()
+        // console.log(this.$util.moduleTest())
     }
 }
 </script>

@@ -47,7 +47,6 @@ router.post('/:_article', (req, res, next) => {
         Article.findById(_article)
             .then(r => {
                 if (!r) throw createError(400, '잘못된 게시물입니다')
-                // if (r.lv < req.user.lv) throw createError(403, '권한이 없습니다')
                 const cmt = {
                     content,
                     _article,

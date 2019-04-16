@@ -19,6 +19,7 @@ import 'highlight.js/styles/github.css'
 import { Editor, Viewer } from '@toast-ui/vue-editor'
 
 import cfg from '../config' // load conifg(/fe/config/index.js)
+import util from '@/utility' // 유틸리티 함수 import
 
 // use moment
 import moment from 'moment'
@@ -27,7 +28,8 @@ moment.locale('ko') // 한글화
 
 Vue.config.productionTip = false
 
-Vue.prototype.$cfg = cfg // registe global cfg
+Vue.prototype.$cfg = cfg // 전역 환경변수 선언
+Vue.prototype.$util = util // 전역 유틸리티 변수 선언
 
 // ssl 붙인 후 제대로 동작함 - 실서버에선 https 로 들어가게
 // fe/config/index.js 의 httpsOnly 를 true 로 변경해야 함.

@@ -72,7 +72,7 @@ router.get('/read/:_id', (req, res, next) => {
     let atc = {} // 게시물을 담을 객체
 
     Article.findByIdAndUpdate(_id, { $inc: {'cnt.view': 1 } }, { new: true })
-        .lean() // 검색 결과를 몽구스객체에서 오브젝트객체로 변경하기 위해 lean() 사용
+        .lean() // 검색 결과를 몽구스객체에서 일반객체로 변경하기 위해 lean() 사용
         .select('content cnt') // 내용(content)과 조회수를 가져온다.
         .then(r => {
             if (!r) throw new Error('잘못된 게시판입니다')
@@ -83,9 +83,9 @@ router.get('/read/:_id', (req, res, next) => {
             atc._comments = [] // 댓글을 담을 배열을 따로 만든다.
             // 댓글 검색 - 게시물 아이디를 키로 검색한다.
             return Comment.find({ _article: atc._id })
-                    .populate({ path: '_user', select: 'id name' }) // 유저의 아이디와 이름을 가져온다.
+                    .populate({ path: '_user', select: '_id id name' }) // 유저의 아이디와 이름을 가져온다.
                     .sort({ _id: 1 }) // 댓글 아이디의 오름차순 정렬(내림차순은 -1)
-                    .limit(5) // 항상 리미트를 걸어주는 습관!
+                    .limit(30) // 항상 리미트를 걸어주는 습관!
         })
         .then(rs => {
             if (rs) atc._comments = rs

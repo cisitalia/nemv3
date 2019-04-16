@@ -118,6 +118,7 @@
                 <v-card-title>
                     <span class="headline">{{selArticle.title}}</span>
                     <v-spacer></v-spacer>
+                    <span class="caption grey--text">{{id2datetime(selArticle._id)}}</span>
                     <v-btn
                         icon
                         @click="dialog=!dialog"
@@ -128,7 +129,6 @@
                 <v-divider></v-divider>
                 <!-- <v-card-text v-html="selArticle.content"></v-card-text> -->
                 <v-card-text height="500px">
-                    <p>내용</p>
                     <viewer
                         height="500px"
                         :value="selArticle.content"
@@ -168,7 +168,9 @@
                 <v-list two-line v-for="comment in selArticle._comments" :key="comment._id">
                     <v-list-tile>
                         <v-list-tile-content>
-                            <v-list-tile-sub-title>작성자 : {{comment._user ? comment._user.id : '손님'}}</v-list-tile-sub-title>
+                            <v-list-tile-sub-title>
+                                작성자 : {{comment._user ? comment._user.id : '손님'}} ({{id2datetime(comment._id)}})
+                            </v-list-tile-sub-title>
                             <v-list-tile-title>{{comment.content}}</v-list-tile-title>
                         </v-list-tile-content>
                         <v-list-tile-action>
@@ -244,19 +246,39 @@
             </v-card>
         </v-dialog>
 
-        <v-dialog width="800" v-model="commentDialog">
-            <v-card min-height="400px">
+        <v-dialog width="800" scrollable v-model="commentDialog">
+            <v-card>
+                <v-card-title>
+                    <span class="subheading font-weight-thin">
+                        작성자 : {{selComment._user ? selComment._user.id : '손님'}}
+                    </span>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                        icon
+                        @click="commentDialog=false"
+                    >
+                        <v-icon>clear</v-icon>
+                    </v-btn>
+                </v-card-title>
+                <v-divider></v-divider>
                 <v-card-text>
                     <v-text-field
                         label="댓글 수정"
                         v-model="selComment.content"
-                        @keyup.enter="modComment()"
+                        append-icon="message"
+                        clearable
+                        outline
+                        @keyup.enter="modComment"
+                        @click:append="modComment"
+                        @click:clear="clearComment"
                     >
                     </v-text-field>
                 </v-card-text>
+                <v-divider></v-divider>
                 <v-card-actions>
-                    <v-btn color="warning" @click="modComment()">수정</v-btn>
-                    <v-btn color="secondary" @click="commentDialog = false">닫기</v-btn>
+                    <v-spacer></v-spacer>
+                    <v-btn color="green darken-1" flat @click="modComment">확인</v-btn>
+                    <v-btn color="red darken-1" flat @click="commentDialog = false">취소</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -585,17 +607,6 @@ export default {
                     if (!e.response) this.$store.commit('pop', { msg: e.message, color: 'warning' })
                 })
         },
-        id2date (val) {
-            if (!val) return '잘못된 시간정보'
-            // return new Date(parseInt(val.substring(0, 8), 16) * 1000).toLocaleString()
-            return this.$moment(parseInt(val.substring(0, 8), 16) * 1000).format('YY.MM.DD')
-        },
-        delay () {
-            clearTimeout(this.timeout)
-            this.timeout = setTimeout(() => {
-                this.list()
-            }, 1000)
-        },
         // toast editor changed event handler
         onEditorChange () {
             // form.content 에 내용을 쳐 넣자!
@@ -663,6 +674,26 @@ export default {
         clearComment () {
             this.formComment.content = ''
             this.selComment.content = ''
+        },
+        // * 유틸리티 함수
+        // 몽구스 _id 를 날짜로 변경하는 함수
+        id2date (val) {
+            if (!val) return '잘못된 시간정보'
+            // return new Date(parseInt(val.substring(0, 8), 16) * 1000).toLocaleString()
+            // return this.$moment(parseInt(val.substring(0, 8), 16) * 1000).format('YY.MM.DD')
+            return this.$util.id2date(val)
+        },
+        // 몽구스 _id 를 날짜시간으로 변경하는 함수
+        id2datetime (val) {
+            if (!val) return '잘못된 시간정보'
+            return this.$util.id2datetime(val)
+        },
+        // 검색시 약간의 딜레이를 주는 함수
+        delay () {
+            clearTimeout(this.timeout)
+            this.timeout = setTimeout(() => {
+                this.list()
+            }, 1000)
         }
     }
 }

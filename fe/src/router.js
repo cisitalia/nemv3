@@ -100,16 +100,18 @@ export default new Router({
         {
             path: '/',
             name: 'dashboard',
-            component: () => import('./views/dashboard'),
-            beforeEnter: pageCheck
+            component: () => import('./views/dashboard')
+            // beforeEnter: pageCheck // 프론트 진입로 이기 때문에 권한체크를 뺐다!
         },
         // * 동적 라우팅시 pageChaeck 가 안걸린다.
-        // fe/src/views/board/index.vue 에서 걸어준다.
+        // fe/src/views/board/index.vue 에도 걸어준다. 여기와 보드 2군데서 다 갈어준다.
+        // 왜냐하면 다른데를 둘러보다가 권한이 안되는 게시판을 클릭하면 들어가기 때문이다.
+        // 동적라우팅은 일단 들어가면 같은 게시판 라우팅시에는 beforeEnter가 먹히지 않는다.
         {
             path: '/board/:name',
             name: 'board',
-            component: () => import('./views/board')
-            // beforeEnter: pageCheck
+            component: () => import('./views/board'),
+            beforeEnter: pageCheck
         },
         {
             path: '/test/lv3',
